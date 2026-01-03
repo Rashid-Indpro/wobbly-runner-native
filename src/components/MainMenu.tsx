@@ -132,7 +132,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
         {/* Active Skin Display */}
         <TouchableOpacity
           style={styles.skinContainer}
-          onPress={onStore}
+          onPress={() => {
+            console.log('🛒 User pressed skin container - Opening Store');
+            onStore();
+          }}
           activeOpacity={0.9}>
           <View style={styles.skinGlow} />
           <View
@@ -173,7 +176,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
 
           <TouchableOpacity
             style={styles.achievementCard}
-            onPress={onAchievements}
+            onPress={() => {
+              console.log('🏆 User pressed achievements button');
+              onAchievements();
+            }}
             activeOpacity={0.8}>
             <Icon name="award" size={20} color="#818cf8" />
             <View style={styles.achievementDot} />
@@ -203,7 +209,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
         {/* DASH Button */}
         <TouchableOpacity
           style={styles.dashButton}
-          onPress={onStart}
+          onPress={() => {
+            console.log('🎮 User pressed DASH button - Starting game!');
+            onStart();
+          }}
           activeOpacity={0.9}>
           <View style={styles.dashButtonInner}>
             <Icon name="play" size={40} color="#4338ca" />
@@ -215,7 +224,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
         <View style={styles.bottomButtons}>
           <TouchableOpacity
             style={styles.bottomButton}
-            onPress={onStore}
+            onPress={() => {
+              console.log('🛒 User pressed Store button');
+              onStore();
+            }}
             activeOpacity={0.8}>
             <Icon name="shopping-bag" size={20} color="#71717a" />
             <Text style={styles.bottomButtonText}>STORE</Text>
@@ -223,7 +235,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
 
           <TouchableOpacity
             style={styles.bottomButton}
-            onPress={onSettings}
+            onPress={() => {
+              console.log('⚙️ User pressed Settings button');
+              onSettings();
+            }}
             activeOpacity={0.8}>
             <Icon name="settings" size={20} color="#71717a" />
             <Text style={styles.bottomButtonText}>SETTINGS</Text>

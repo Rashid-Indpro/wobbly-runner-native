@@ -10,7 +10,7 @@ import { soundManager } from '../utils/SoundManager';
 // React Native doesn't have requestAnimationFrame/cancelAnimationFrame/performance in global scope
 if (typeof requestAnimationFrame === 'undefined') {
   (global as any).requestAnimationFrame = (callback: (time: number) => void) => {
-    return setTimeout(() => callback(Date.now()), 1000 / 60) as unknown as number;
+    return setTimeout(() => callback(Date.now()), 1000 / 50) as unknown as number; // 50fps for smoother mobile
   };
 }
 
@@ -169,12 +169,16 @@ const GameContainer: React.FC<GameContainerProps> = ({
     const update = () => {
       if (isPaused || gameStateRef.current.gameOver || isExternalAdShowing) return;
       const state = gameStateRef.current;
-      state.frame++;
-      state.speed = INITIAL_SPEED * getSpeedMultiplier(state.score);
+      state.frame++;      
+      // Only log every 300 frames to avoid spam
+      if (state.frame === 300) {
+        console.log('🎮 Game animation optimized for mobile - smoother movement enabled');
+      }
+            state.speed = INITIAL_SPEED * getSpeedMultiplier(state.score);
       state.score += (1 * activeSkin.perks.scoreMult);
       setScore(Math.floor(state.score / 10));
-      state.player.x += (state.player.targetX - state.player.x) * 0.22;
-      state.player.wobble = Math.sin(state.frame * 0.12) * 8;
+      state.player.x += (state.player.targetX - state.player.x) * 0.12; // Reduced from 0.22 for smoother movement
+      state.player.wobble = Math.sin(state.frame * 0.08) * 5; // Reduced frequency and amplitude for mobile
 
       if (activePower && Date.now() > activePower.expiry) setActivePower(null);
       
@@ -193,19 +197,20 @@ const GameContainer: React.FC<GameContainerProps> = ({
         const obs = state.obstacles[i];
         if (activePower?.type !== PowerUpType.TIME_FREEZE) {
           obs.y += obs.speed * (activePower?.type === PowerUpType.SONIC_DASH ? 1.5 : 1);
-          obs.rotation += 0.05;
-          if (obs.behavior === 'SINE_WAVE') obs.x = obs.baseX + Math.sin(obs.y * 0.02) * 60;
+          obs.rotation += 0.03; // Reduced from 0.05 for smoother rotation
+          if (obs.behavior === 'SINE_WAVE') obs.x = obs.baseX + Math.sin(obs.y * 0.015) * 45; // Reduced frequency and amplitude
           else if (obs.behavior === 'LANE_SWITCH' && state.frame % 120 === 0) {
             obs.lane = Math.max(0, Math.min(2, obs.lane + (Math.random() > 0.5 ? 1 : -1)));
             obs.baseX = getLaneX(obs.lane, state.canvasWidth);
           } else if (obs.behavior === 'TELEPORT' && state.frame % 60 === 0) obs.x = obs.baseX + (Math.random() - 0.5) * 40;
-          if (obs.behavior === 'LANE_SWITCH') obs.x += (obs.baseX - obs.x) * 0.05;
+          if (obs.behavior === 'LANE_SWITCH') obs.x += (obs.baseX - obs.x) * 0.03; // Reduced from 0.05
         }
 
         const dx = Math.abs(obs.x - state.player.x);
         const dy = Math.abs(obs.y - state.player.y);
         
         if (!isInvincible && dx < 44 && dy < 48) {
+          console.log('💥 Game Over! Final score:', Math.floor(state.score / 10), 'Coins:', Math.floor(state.coins));
           state.gameOver = true;
           setShowGameOver(true);
           soundManager.playFail();
@@ -226,14 +231,21 @@ const GameContainer: React.FC<GameContainerProps> = ({
         const dist = Math.sqrt(Math.pow(coll.x - state.player.x, 2) + Math.pow(coll.y - state.player.y, 2));
 
         if (totalMagnet > 0 && dist < totalMagnet && (coll.type === 'COIN' || coll.type === 'GEM')) {
-           coll.x += (state.player.x - coll.x) * 0.25;
-           coll.y += (state.player.y - coll.y) * 0.25;
+           coll.x += (state.player.x - coll.x) * 0.15; // Reduced from 0.25
+           coll.y += (state.player.y - coll.y) * 0.15; // Reduced from 0.25
         } else if (activePower?.type !== PowerUpType.TIME_FREEZE) coll.y += state.speed;
 
         if (Math.abs(coll.x - state.player.x) < 45 && Math.abs(coll.y - state.player.y) < 45) {
-          if (coll.type === 'COIN') state.coins += (currentCoinValue * activeSkin.perks.coinMult);
-          else if (coll.type === 'GEM') state.coins += (currentCoinValue * 5 * activeSkin.perks.coinMult);
+          if (coll.type === 'COIN') {
+            console.log('🪙 Coin collected! Total coins:', Math.floor(state.coins + (currentCoinValue * activeSkin.perks.coinMult)));
+            state.coins += (currentCoinValue * activeSkin.perks.coinMult);
+          }
+          else if (coll.type === 'GEM') {
+            console.log('💎 Gem collected! Total coins:', Math.floor(state.coins + (currentCoinValue * 5 * activeSkin.perks.coinMult)));
+            state.coins += (currentCoinValue * 5 * activeSkin.perks.coinMult);
+          }
           else if (coll.powerType) {
+            console.log('⚡ Power-up collected:', coll.powerType);
             setActivePower({ 
               type: coll.powerType, 
               start: Date.now(), 

@@ -709,7 +709,6 @@ const styles = StyleSheet.create({
     shadowRadius: 120,
     borderWidth: 4,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    elevation: 30,
   },
   modalTextContainer: {
     marginTop: 40,

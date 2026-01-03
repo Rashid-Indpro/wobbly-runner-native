@@ -83,18 +83,27 @@ const App: React.FC = () => {
   }, []);
 
   const handleSplashComplete = () => {
-    if (!settings.hasSeenTutorial) setGameState('TUTORIAL');
-    else setGameState('MAIN_MENU');
+    console.log('🚀 App launched - Splash screen completed');
+    if (!settings.hasSeenTutorial) {
+      console.log('📚 First time user - Showing tutorial');
+      setGameState('TUTORIAL');
+    } else {
+      console.log('🏠 Returning user - Going to main menu');
+      setGameState('MAIN_MENU');
+    }
     soundManager.startBGM();
     updateAchievements({ score: 0, coins: 0, powerUpsUsed: 0, distanceTraveled: 0 }, true);
   };
 
   const onStartGameRequested = () => {
+    console.log('🎯 User requested game start');
     if (Math.random() < 0.2) { 
+      console.log('📺 Showing ad before game start');
       soundManager.stopBGM();
       setAdPurpose('START');
       setGameState('AD_WATCHING');
     } else {
+      console.log('🎮 Starting game directly - Game ID:', gameId + 1);
       setGameId(prev => prev + 1);
       setGameState('PLAYING');
     }
@@ -244,10 +253,22 @@ const App: React.FC = () => {
         <MainMenu 
           highScore={highScore}
           onStart={onStartGameRequested}
-          onStore={() => setGameState('STORE')}
-          onSettings={() => setGameState('SETTINGS')}
-          onAchievements={() => setGameState('ACHIEVEMENTS')}
-          onAboutUs={() => setGameState('ABOUT_US')}
+          onStore={() => {
+            console.log('🛒 Navigating to Store');
+            setGameState('STORE');
+          }}
+          onSettings={() => {
+            console.log('⚙️ Navigating to Settings');
+            setGameState('SETTINGS');
+          }}
+          onAchievements={() => {
+            console.log('🏆 Navigating to Achievements');
+            setGameState('ACHIEVEMENTS');
+          }}
+          onAboutUs={() => {
+            console.log('ℹ️ Navigating to About Us');
+            setGameState('ABOUT_US');
+          }}
           activeSkin={activeSkin}
           achievements={achievements}
           equippedPowers={equippedPowers}
