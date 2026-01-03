@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Feather as Icon } from '@expo/vector-icons';
-import { Settings, BGMTrack } from '../types';
+import { Settings, BGMTrack, LegalPageType } from '../types';
 import AboutUs from './AboutUs';
 import { storage } from '../utils/storage';
 
@@ -10,9 +10,10 @@ interface SettingsScreenProps {
   onSave: (s: Settings) => void;
   onBack: () => void;
   onShowTutorial: () => void;
+  onOpenLegalPage?: (type: LegalPageType) => void;
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBack, onShowTutorial }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBack, onShowTutorial, onOpenLegalPage }) => {
   const [view, setView] = useState<'MAIN' | 'ABOUT' | 'POLICY' | 'TERMS' | 'CONSENT' | 'BGM'>('MAIN');
 
   const toggle = (key: keyof Settings) => {
@@ -45,7 +46,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
     'SHUFFLE', 'ARCADE_LEVEL', 'POWER_PULSE', 'NEON_RUSH', 'GLITCH_HOP', 'CHIP_CHASE', 'CALM_JOURNEY', 'MELODIOUS_WAVE', 'SUSPENSE_PLOT'
   ];
 
-  if (view === 'ABOUT') return <AboutUs onBack={() => setView('MAIN')} />;
+  if (view === 'ABOUT') return <AboutUs onBack={() => setView('MAIN')} onOpenLegalPage={onOpenLegalPage || (() => {})} />;
 
   // BGM Selection View
   if (view === 'BGM') {

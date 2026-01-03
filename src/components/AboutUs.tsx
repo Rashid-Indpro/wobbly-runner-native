@@ -2,15 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Animated } from 'react-native';
 import { Feather as Icon } from '@expo/vector-icons';
 import LinearGradient from './LinearGradient';
+import { LegalPageType } from '../types';
 
 interface AboutUsProps {
   onBack: () => void;
+  onOpenLegalPage: (type: LegalPageType) => void;
 }
 
 const TANVEER_IMAGE = require('../../assets/images/tanveerAlamPhoto.jpg');
 const RASHID_IMAGE = require('../../assets/images/mdRashidPhoto.jpg');
 
-const AboutUs: React.FC<AboutUsProps> = ({ onBack }) => {
+const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
   const [viewerImage, setViewerImage] = useState<{ image: any, name: string } | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
@@ -166,6 +168,54 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack }) => {
             <Icon name="heart" size={16} color="#EF4444" />
             <Text style={styles.footerText}>Crafted with Obsession</Text>
           </View>
+          
+          {/* Legal Links Section */}
+          <View style={styles.legalSection}>
+            <Text style={styles.legalSectionTitle}>Legal Information</Text>
+            <Text style={styles.legalSectionSubtitle}>Transparency & Trust</Text>
+            
+            <View style={styles.legalLinks}>
+              <TouchableOpacity 
+                style={styles.legalButton}
+                onPress={() => {
+                  console.log('📄 User tapped Privacy Policy from About Us');
+                  onOpenLegalPage('PRIVACY');
+                }}
+                activeOpacity={0.8}
+              >
+                <Icon name="shield" size={20} color="#667eea" />
+                <Text style={styles.legalButtonText}>Privacy Policy</Text>
+                <Icon name="chevron-right" size={16} color="#a1a1aa" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.legalButton}
+                onPress={() => {
+                  console.log('📄 User tapped Terms & Conditions from About Us');
+                  onOpenLegalPage('TERMS');
+                }}
+                activeOpacity={0.8}
+              >
+                <Icon name="file-text" size={20} color="#667eea" />
+                <Text style={styles.legalButtonText}>Terms & Conditions</Text>
+                <Icon name="chevron-right" size={16} color="#a1a1aa" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.legalButton}
+                onPress={() => {
+                  console.log('📄 User tapped Contact Us from About Us');
+                  onOpenLegalPage('CONTACT');
+                }}
+                activeOpacity={0.8}
+              >
+                <Icon name="mail" size={20} color="#667eea" />
+                <Text style={styles.legalButtonText}>Contact Support</Text>
+                <Icon name="chevron-right" size={16} color="#a1a1aa" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          
           <Text style={styles.footerCopyright}>
             © 2024 WOBBLY GAMES STUDIO • PRESTIGE EDITION
           </Text>
@@ -733,6 +783,49 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     marginTop: 16,
     textAlign: 'center',
+  },
+  // Legal Links Section Styles
+  legalSection: {
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  legalSectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  legalSectionSubtitle: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  legalLinks: {
+    gap: 12,
+  },
+  legalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    gap: 15,
+  },
+  legalButtonText: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

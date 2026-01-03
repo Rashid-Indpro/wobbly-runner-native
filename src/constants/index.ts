@@ -1,6 +1,14 @@
 
 import { PowerUpType, PowerUp, Skin, Challenge, Achievement, Rarity } from '../types';
 
+// Legal Pages URLs - Public GitHub Pages URLs
+export const LEGAL_PAGES = {
+  PRIVACY: 'https://rashid-indpro.github.io/wobbly-runner-native/privacy-policy.html',
+  TERMS: 'https://rashid-indpro.github.io/wobbly-runner-native/terms-conditions.html',
+  ABOUT: 'https://rashid-indpro.github.io/wobbly-runner-native/about-us.html',
+  CONTACT: 'https://rashid-indpro.github.io/wobbly-runner-native/contact-us.html'
+};
+
 export const POWER_UPS: Record<PowerUpType, PowerUp> = {
   [PowerUpType.SLOW_MO]: { id: 'p1', type: PowerUpType.SLOW_MO, name: 'Sluggish Time', description: 'Slows down everything!', color: '#34d399', icon: '⏱️', duration: 9000, purchasedDuration: 15000, startingPowerUsesRemaining: 0, coinPrice: 800 },
   [PowerUpType.MAGNET]: { id: 'p2', type: PowerUpType.MAGNET, name: 'Greedy Magnet', description: 'Pulls all coins nearby!', color: '#60a5fa', icon: '🧲', duration: 9000, purchasedDuration: 20000, startingPowerUsesRemaining: 0, coinPrice: 1200 },

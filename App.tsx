@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
-import { GameState, Settings, PowerUp, RunStats, Skin, Achievement } from './src/types';
-import { SKINS, INITIAL_ACHIEVEMENTS, POWER_UPS } from './src/constants';
+import { GameState, Settings, PowerUp, RunStats, Skin, Achievement, LegalPageType } from './src/types';
+import { SKINS, INITIAL_ACHIEVEMENTS, POWER_UPS, LEGAL_PAGES } from './src/constants';
 import { getItem, setItem } from './src/utils/storage';
 import MainMenu from './src/components/MainMenu';
 import GameContainer from './src/components/GameContainer';
@@ -12,6 +12,7 @@ import AdSimulator from './src/components/AdSimulator';
 import AchievementsScreen from './src/components/AchievementsScreen';
 import SplashScreen from './src/components/SplashScreen';
 import AboutUs from './src/components/AboutUs';
+import LegalWebView from './src/components/LegalWebView';
 import { soundManager } from './src/utils/SoundManager';
 
 const App: React.FC = () => {
@@ -36,6 +37,25 @@ const App: React.FC = () => {
   
   const [adPurpose, setAdPurpose] = useState<'REVIVE' | 'STORE' | 'START' | 'SKIN' | 'GET_COINS' | null>(null);
   const [adPurposeItem, setAdPurposeItem] = useState<any>(null);
+  
+  // Helper function to open legal pages
+  const openLegalPage = (type: LegalPageType) => {
+    console.log(`📄 User requested ${type} page`);
+    switch (type) {
+      case 'PRIVACY':
+        setGameState('LEGAL_PRIVACY');
+        break;
+      case 'TERMS':
+        setGameState('LEGAL_TERMS');
+        break;
+      case 'ABOUT':
+        setGameState('LEGAL_ABOUT');
+        break;
+      case 'CONTACT':
+        setGameState('LEGAL_CONTACT');
+        break;
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -311,13 +331,48 @@ const App: React.FC = () => {
           onSave={handleSaveSettings}
           onBack={() => setGameState('MAIN_MENU')}
           onShowTutorial={() => setGameState('TUTORIAL')}
+          onOpenLegalPage={openLegalPage}
         />
       )}
       {gameState === 'ACHIEVEMENTS' && (
         <AchievementsScreen achievements={achievements} onBack={() => setGameState('MAIN_MENU')} />
       )}
       {gameState === 'ABOUT_US' && (
-        <AboutUs onBack={() => setGameState('MAIN_MENU')} />
+        <AboutUs 
+          onBack={() => {
+            console.log('⬅️ Returning to main menu from About Us');
+            setGameState('MAIN_MENU');
+          }}
+          onOpenLegalPage={openLegalPage}
+        />
+      )}
+      {gameState === 'LEGAL_PRIVACY' && (
+        <LegalWebView 
+          url={LEGAL_PAGES.PRIVACY}
+          title="Privacy Policy"
+          onBack={() => setGameState('ABOUT_US')}
+        />
+      )}
+      {gameState === 'LEGAL_TERMS' && (
+        <LegalWebView 
+          url={LEGAL_PAGES.TERMS}
+          title="Terms & Conditions"
+          onBack={() => setGameState('ABOUT_US')}
+        />
+      )}
+      {gameState === 'LEGAL_ABOUT' && (
+        <LegalWebView 
+          url={LEGAL_PAGES.ABOUT}
+          title="About Us"
+          onBack={() => setGameState('ABOUT_US')}
+        />
+      )}
+      {gameState === 'LEGAL_CONTACT' && (
+        <LegalWebView 
+          url={LEGAL_PAGES.CONTACT}
+          title="Contact Us"
+          onBack={() => setGameState('ABOUT_US')}
+        />
       )}
       {gameState === 'TUTORIAL' && (
         <Tutorial onComplete={() => {

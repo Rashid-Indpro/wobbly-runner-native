@@ -1,5 +1,7 @@
 
-export type GameState = 'SPLASH' | 'MAIN_MENU' | 'PLAYING' | 'STORE' | 'SETTINGS' | 'GAME_OVER' | 'AD_WATCHING' | 'TUTORIAL' | 'ACHIEVEMENTS' | 'CONSENT' | 'ABOUT_US';
+export type GameState = 'SPLASH' | 'MAIN_MENU' | 'PLAYING' | 'STORE' | 'SETTINGS' | 'GAME_OVER' | 'AD_WATCHING' | 'TUTORIAL' | 'ACHIEVEMENTS' | 'CONSENT' | 'ABOUT_US' | 'LEGAL_PRIVACY' | 'LEGAL_TERMS' | 'LEGAL_ABOUT' | 'LEGAL_CONTACT';
+
+export type LegalPageType = 'PRIVACY' | 'TERMS' | 'ABOUT' | 'CONTACT';
 
 export enum PowerUpType {
   SLOW_MO = 'SLOW_MO',
