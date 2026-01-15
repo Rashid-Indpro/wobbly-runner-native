@@ -16,38 +16,24 @@ interface SplashScreenProps {
 }
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
-  const [phase, setPhase] = useState(0);
-  const fadeAnim = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(1.5);
+  const [phase, setPhase] = useState(2); // Start at phase 2 with content visible
+  const fadeAnim = new Animated.Value(1); // Start fully visible
+  const scaleAnim = new Animated.Value(1); // Start at normal scale
   const bounceAnim = new Animated.Value(0);
+  const wobbleAnim = new Animated.Value(0);
+  const emojiPulseAnim = new Animated.Value(1);
+  const sparkleRotateAnim = new Animated.Value(0);
+  const glowAnim = new Animated.Value(0.4);
 
   useEffect(() => {
-    // Stage 0: Black Screen with subtle particles
-    // Stage 1: Lens Flare / Flash
-    const t1 = setTimeout(() => setPhase(1), 500);
-    // Stage 2: Logo Drops / Slam
-    const t2 = setTimeout(() => {
-      setPhase(2);
-      // Animate logo entrance
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 5,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 1200);
+    // Character is visible from start (no fade-in needed)
+    
     // Stage 3: Title Shimmer
-    const t3 = setTimeout(() => setPhase(3), 2000);
+    const t3 = setTimeout(() => setPhase(3), 1000);
     // Stage 4: Founders Reveal
-    const t4 = setTimeout(() => setPhase(4), 3200);
+    const t4 = setTimeout(() => setPhase(4), 2200);
     // Complete
-    const t5 = setTimeout(() => onComplete(), 5500);
+    const t5 = setTimeout(() => onComplete(), 4500);
 
     // Bounce animation for logo
     Animated.loop(
@@ -65,47 +51,141 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       ])
     ).start();
 
+    // Wobble rotation for character (continuous)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(wobbleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(wobbleAnim, {
+          toValue: -1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(wobbleAnim, {
+          toValue: 0,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Emoji pulse animation (breathing effect)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(emojiPulseAnim, {
+          toValue: 1.15,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(emojiPulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Sparkle rotation animation
+    Animated.loop(
+      Animated.timing(sparkleRotateAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      })
+    ).start();
+
+    // Glow pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 0.8,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0.4,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+
     return () => {
-      [t1, t2, t3, t4, t5].forEach(t => clearTimeout(t));
+      [t3, t4, t5].forEach(t => clearTimeout(t));
     };
   }, [onComplete]);
 
   return (
     <View style={styles.container}>
-      {/* Background */}
+      {/* Background - enhanced visibility */}
       <View style={styles.background}>
         <View style={styles.glowCircle} />
       </View>
 
-      {/* Phase 1: Flash */}
-      {phase === 1 && (
-        <View style={styles.flashContainer}>
-          <View style={styles.flash} />
-        </View>
-      )}
-
-      {/* Phase 2: Logo Assembly */}
+      {/* Logo - now visible from start with beautiful animations */}
       <Animated.View
         style={[
           styles.logoContainer,
           {
-            opacity: phase >= 2 ? fadeAnim : 0,
+            opacity: fadeAnim,
             transform: [
-              { scale: phase >= 2 ? scaleAnim : 1.5 },
+              { scale: scaleAnim },
               { translateY: bounceAnim },
             ],
           },
         ]}>
-        <LinearGradient
-          colors={['#facc15', '#f97316', '#dc2626']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.logoBox}>
-          <Text style={styles.logoEmoji}>🤪</Text>
-        </LinearGradient>
-        <View style={styles.sparkleBox}>
+        <Animated.View
+          style={{
+            shadowColor: '#f97316',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: glowAnim,
+            shadowRadius: 60,
+            elevation: 20,
+          }}>
+          <LinearGradient
+            colors={['#facc15', '#f97316', '#dc2626']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.logoBox}>
+            <Animated.Text
+              style={[
+                styles.logoEmoji,
+                {
+                  transform: [
+                    {
+                      rotate: wobbleAnim.interpolate({
+                        inputRange: [-1, 0, 1],
+                        outputRange: ['-15deg', '-12deg', '-9deg'],
+                      }),
+                    },
+                    { scale: emojiPulseAnim },
+                  ],
+                },
+              ]}>
+              🤪
+            </Animated.Text>
+          </LinearGradient>
+        </Animated.View>
+        <Animated.View
+          style={[
+            styles.sparkleBox,
+            {
+              transform: [
+                {
+                  rotate: sparkleRotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+                { scale: emojiPulseAnim },
+              ],
+            },
+          ]}>
           <Text style={styles.sparkle}>✨</Text>
-        </View>
+        </Animated.View>
       </Animated.View>
 
       {/* Phase 3: Title */}
@@ -198,7 +278,7 @@ const styles = StyleSheet.create({
     left: width * 0.1,
     width: width * 0.8,
     height: width * 0.8,
-    backgroundColor: 'rgba(99, 102, 241, 0.05)',
+    backgroundColor: 'rgba(99, 102, 241, 0.12)',
     borderRadius: width * 0.4,
   },
   flashContainer: {
