@@ -122,6 +122,9 @@ class SoundManager {
   async playBackgroundAudio() {
     if (!this.backgroundAudioEnabled || this.isBackgroundPlaying) return;
     
+    // Set flag IMMEDIATELY to prevent race conditions with concurrent calls
+    this.isBackgroundPlaying = true;
+    
     await this.ensureInitialized();
     
     try {
@@ -130,11 +133,11 @@ class SoundManager {
         { isLooping: true, shouldPlay: true, volume: 1.0 }
       );
       this.backgroundAudioSound = sound;
-      this.isBackgroundPlaying = true;
       console.log('🎵 Background audio started');
     } catch (error) {
       console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
       this.isBackgroundPlaying = false;
+      this.backgroundAudioSound = null;
     }
   }
 
@@ -142,16 +145,24 @@ class SoundManager {
    * Stop background audio
    */
   async stopBackgroundAudio() {
+    // Set flag immediately to prevent new playback attempts
+    this.isBackgroundPlaying = false;
+    
     if (this.backgroundAudioSound) {
+      const soundToStop = this.backgroundAudioSound;
+      this.backgroundAudioSound = null; // Clear reference immediately
+      
       try {
-        await this.backgroundAudioSound.stopAsync();
-        await this.backgroundAudioSound.unloadAsync();
-        this.backgroundAudioSound = null;
+        // Check if sound is actually loaded before attempting to stop
+        const status = await soundToStop.getStatusAsync();
+        if (status.isLoaded) {
+          await soundToStop.stopAsync();
+          await soundToStop.unloadAsync();
+        }
       } catch (error) {
-        console.error('❌ Error stopping background audio:', error);
+        // Silently handle - sound may already be unloaded
       }
     }
-    this.isBackgroundPlaying = false;
     console.log('🔇 Background audio stopped');
   }
 

@@ -187,9 +187,24 @@ const GameContainer: React.FC<GameContainerProps> = ({
 
   // Music management
   useEffect(() => {
-    if (isExternalAdShowing) soundManager.stopBackgroundAudio();
-    else if (!isPaused && !showGameOver) soundManager.playBackgroundAudio();
-  }, [isExternalAdShowing, isPaused, showGameOver]);
+    if (isExternalAdShowing || !settings.musicEnabled) {
+      // Stop music if: ad showing OR music disabled
+      soundManager.stopBackgroundAudio();
+    } else if (isPaused || showGameOver) {
+      // Stop music if: game paused OR game over
+      soundManager.stopBackgroundAudio();
+    } else {
+      // Play music only if: game active AND music enabled
+      soundManager.playBackgroundAudio();
+    }
+  }, [isExternalAdShowing, isPaused, showGameOver, settings.musicEnabled]);
+  
+  // Cleanup only on unmount
+  useEffect(() => {
+    return () => {
+      soundManager.stopBackgroundAudio();
+    };
+  }, []);
 
   // Game loop
   useEffect(() => {
@@ -562,9 +577,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
           currentStart: activePower.start 
         } : null} 
         onPause={() => { 
-          setIsPaused(!isPaused); 
-          if (!isPaused) soundManager.stopBackgroundAudio(); 
-          else soundManager.playBackgroundAudio(); 
+          setIsPaused(!isPaused);
+          // Music is now managed by useEffect - no direct control here
         }} 
         onBack={handleBackPress}
         isPaused={isPaused} 
