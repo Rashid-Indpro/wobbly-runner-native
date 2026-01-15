@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   infoTag: {
     position: 'absolute',
-    top: 24,
+    top: 60,
     left: 24,
     flexDirection: 'row',
     alignItems: 'center',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   topRight: {
     position: 'absolute',
-    top: 24,
+    top: 60,
     right: 24,
   },
   closeButton: {

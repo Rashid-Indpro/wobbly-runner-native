@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration, Animated } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration, Animated, BackHandler } from 'react-native';
 import { Settings, PowerUp, PowerUpType, Obstacle, Collectible, Skin, ObstacleBehavior } from '../types';
 import { POWER_UPS, INITIAL_SPEED, SPAWN_RATE, COIN_VALUE } from '../constants';
 import UIOverlay from './UIOverlay';
@@ -83,6 +83,23 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const wasAdShowingRef = useRef(false);
 
   const getLaneX = (lane: number, canvasWidth: number) => (canvasWidth / 3) * lane + (canvasWidth / 3) / 2;
+
+  // Safe exit handler - stops game loop, cleans up audio, navigates back
+  const handleBackPress = () => {
+    console.log('⬅️ Back button pressed - Safely exiting gameplay');
+    
+    // Stop animation frame loop (primary cleanup)
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    // Stop audio
+    soundManager.stopBackgroundAudio();
+    
+    // Navigate back to main menu (component will unmount and clean up effects)
+    onExit();
+  };
 
   // Trigger joyful collection effect
   const triggerCollectEffect = (type: 'COIN' | 'GEM' | 'POWER_UP') => {
@@ -367,6 +384,20 @@ const GameContainer: React.FC<GameContainerProps> = ({
     };
   }, [isPaused, activePower, activeSkin, isExternalAdShowing]);
 
+  // Android hardware back button handler
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!showGameOver) {
+        // During active gameplay or pause - safely exit
+        handleBackPress();
+        return true; // Prevent default back behavior
+      }
+      return false; // Allow GameOver screen to handle back
+    });
+
+    return () => backHandler.remove();
+  }, [showGameOver]);
+
   const handleManualPowerUse = (power: PowerUp) => {
     if (gameStateRef.current.gameOver || isPaused || isExternalAdShowing) return;
     if ((ownedPowerUses[power.id] || 0) > 0) {
@@ -535,6 +566,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           if (!isPaused) soundManager.stopBackgroundAudio(); 
           else soundManager.playBackgroundAudio(); 
         }} 
+        onBack={handleBackPress}
         isPaused={isPaused} 
         equippedPowers={equippedPowers}
         ownedPowerUses={ownedPowerUses}

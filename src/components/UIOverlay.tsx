@@ -8,6 +8,7 @@ interface UIOverlayProps {
   coins: number;
   activePower: (PowerUp & { currentExpiry: number, currentStart: number }) | null;
   onPause: () => void;
+  onBack: () => void;
   isPaused: boolean;
   equippedPowers: PowerUp[];
   ownedPowerUses: Record<string, number>;
@@ -19,6 +20,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
   coins, 
   activePower, 
   onPause, 
+  onBack,
   isPaused, 
   equippedPowers, 
   ownedPowerUses, 
@@ -55,17 +57,27 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
           </View>
         </View>
 
-        <TouchableOpacity 
-          onPress={onPause}
-          style={styles.pauseButton}
-          activeOpacity={0.8}
-        >
-          {isPaused ? (
-            <Icon name="play" size={24} color="#FFFFFF" />
-          ) : (
-            <Icon name="pause" size={24} color="#FFFFFF" />
-          )}
-        </TouchableOpacity>
+        <View style={styles.controlButtons}>
+          <TouchableOpacity 
+            onPress={onBack}
+            style={styles.backButton}
+            activeOpacity={0.8}
+          >
+            <Icon name="arrow-left" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={onPause}
+            style={styles.pauseButton}
+            activeOpacity={0.8}
+          >
+            {isPaused ? (
+              <Icon name="play" size={24} color="#FFFFFF" />
+            ) : (
+              <Icon name="pause" size={24} color="#FFFFFF" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.bottomContainer}>
@@ -113,7 +125,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    padding: 24,
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
     justifyContent: 'space-between',
   },
   topRow: {
@@ -155,6 +169,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 14,
+  },
+  controlButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  backButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pauseButton: {
     width: 48,
