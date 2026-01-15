@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import { Settings, BGMTrack, LegalPageType } from '../types';
 import AboutUs from './AboutUs';
@@ -43,7 +44,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
   // Legal & Data Views
   if (view === 'POLICY' || view === 'TERMS' || view === 'CONSENT') {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.headerContainer}>
           <View style={styles.headerRow}>
             <Text style={styles.viewTitle}>
@@ -118,13 +119,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
             </View>
           )}
         </ScrollView>
-      </View>
+      </SafeAreaView>
     );
   }
 
   // Main Settings View
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.headerContainer}>
         <TouchableOpacity 
@@ -216,7 +217,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
           <Text style={styles.versionText}>Version 2.5.0 Prestige</Text>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, StatusBar } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { Feather as Icon } from '@expo/vector-icons';
 
@@ -44,8 +45,7 @@ const LegalWebView: React.FC<LegalWebViewProps> = ({ url, title, onBack }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#4338ca" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       
       {/* Header */}
       <View style={styles.header}>
@@ -84,7 +84,7 @@ const LegalWebView: React.FC<LegalWebViewProps> = ({ url, title, onBack }) => {
           <Text style={styles.reopenButtonText}>Open Again</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

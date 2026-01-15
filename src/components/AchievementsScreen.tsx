@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Animated, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Achievement, Rarity } from '../types';
@@ -117,7 +118,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
@@ -339,7 +340,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
           </View>
         )}
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 

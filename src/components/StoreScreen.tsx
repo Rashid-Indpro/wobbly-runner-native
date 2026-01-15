@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import LinearGradient from './LinearGradient';
 import { PowerUp, Skin, Rarity } from '../types';
@@ -69,7 +70,7 @@ const StoreScreen: React.FC<StoreScreenProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity 
@@ -389,7 +390,7 @@ const StoreScreen: React.FC<StoreScreenProps> = ({
           </View>
         )}
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 

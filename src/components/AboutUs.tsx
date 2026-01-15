@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import LinearGradient from './LinearGradient';
 import { LegalPageType } from '../types';
@@ -31,7 +32,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
@@ -260,7 +261,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
           </TouchableOpacity>
         )}
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameState, Settings, PowerUp, RunStats, Skin, Achievement, LegalPageType } from './src/types';
 import { SKINS, INITIAL_ACHIEVEMENTS, POWER_UPS, LEGAL_PAGES } from './src/constants';
 import { getItem, setItem } from './src/utils/storage';
@@ -265,10 +266,11 @@ const App: React.FC = () => {
     .filter(Boolean) as PowerUp[];
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" backgroundColor="#09090b" />
-      {gameState === 'SPLASH' && <SplashScreen onComplete={handleSplashComplete} />}
-      {gameState === 'MAIN_MENU' && (
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <StatusBar style="light" translucent={false} />
+        {gameState === 'SPLASH' && <SplashScreen onComplete={handleSplashComplete} />}
+        {gameState === 'MAIN_MENU' && (
         <MainMenu 
           highScore={highScore}
           onStart={onStartGameRequested}
@@ -382,7 +384,8 @@ const App: React.FC = () => {
       {gameState === 'AD_WATCHING' && (
         <AdSimulator onComplete={handleAdComplete} />
       )}
-    </View>
+      </View>
+    </SafeAreaProvider>
   );
 };
 
