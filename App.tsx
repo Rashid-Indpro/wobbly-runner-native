@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { GameState, Settings, PowerUp, RunStats, Skin, Achievement, LegalPageType } from './src/types';
 import { SKINS, INITIAL_ACHIEVEMENTS, POWER_UPS, LEGAL_PAGES } from './src/constants';
 import { getItem, setItem } from './src/utils/storage';
@@ -267,7 +268,7 @@ const App: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#09090b" />
+      <StatusBar style="light" backgroundColor="#09090b" />
       {gameState === 'SPLASH' && <SplashScreen onComplete={handleSplashComplete} />}
       {gameState === 'MAIN_MENU' && (
         <MainMenu 

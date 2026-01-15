@@ -1,12 +1,9 @@
-import { Audio } from 'expo-av';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from 'expo-av';
 import { BGMTrack } from '../types';
 
 /**
- * SoundManager for React Native
- * Converted from Web Audio API to expo-av
- * 
- * Note: This version uses simple beep sounds. For production, 
- * you should add actual audio files to assets/ folder and load them.
+ * SoundManager for React Native (SDK 54 Compatible)
+ * Updated for expo-av 14.x API changes
  */
 
 class SoundManager {
@@ -15,24 +12,50 @@ class SoundManager {
   private currentBgm: BGMTrack = 'SHUFFLE';
   private bgmInterval: any = null;
   private currentStep: number = 0;
-  private audioMode: Audio.AudioMode = {
+  
+  // SDK 54 compatible audio mode
+  private audioMode = {
     playsInSilentModeIOS: true,
     staysActiveInBackground: false,
     shouldDuckAndroid: true,
+    // NEW in SDK 54
+    interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+    shouldRouteThroughEarpiece: false,
+    interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
   };
 
   // Sound objects cache
   private sounds: { [key: string]: Audio.Sound } = {};
+  private isInitialized: boolean = false;
 
   constructor() {
     this.init();
   }
 
   private async init() {
+    if (this.isInitialized) return;
+    
     try {
       await Audio.setAudioModeAsync(this.audioMode);
+      this.isInitialized = true;
+      console.log('✅ Audio system initialized (SDK 54)');
     } catch (error) {
-      console.error('Error initializing audio:', error);
+      console.error('❌ Error initializing audio:', error);
+      // Fallback to basic mode
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+        });
+        this.isInitialized = true;
+      } catch (fallbackError) {
+        console.error('❌ Fatal audio initialization error:', fallbackError);
+      }
+    }
+  }
+
+  async ensureInitialized() {
+    if (!this.isInitialized) {
+      await this.init();
     }
   }
 
@@ -58,7 +81,8 @@ class SoundManager {
    */
   private async playBeep(frequency: number = 440, duration: number = 100) {
     if (!this.enabled) return;
-
+    await this.ensureInitialized();
+    
     // TODO: Add actual audio files to assets/sounds/
     // For now, skip audio playback to prevent crashes
     // Silent operation until audio files are added
@@ -67,25 +91,21 @@ class SoundManager {
 
   async playMove() {
     if (!this.enabled) return;
-    // Low frequency beep for movement
     await this.playBeep(200, 100);
   }
 
   async playCollect() {
     if (!this.enabled) return;
-    // High frequency beep for collection
     await this.playBeep(880, 100);
   }
 
   async playPowerUp() {
     if (!this.enabled) return;
-    // Medium frequency for power-up
     await this.playBeep(440, 500);
   }
 
   async playFail() {
     if (!this.enabled) return;
-    // Low frequency for failure
     await this.playBeep(100, 500);
   }
 
@@ -96,7 +116,8 @@ class SoundManager {
     }
   }
 
-  startBGM() {
+  async startBGM() {
+    await this.ensureInitialized();
     if (!this.musicEnabled || this.bgmInterval) return;
     
     // Start background music loop
@@ -167,7 +188,7 @@ class SoundManager {
 
   /**
    * Clean up all audio resources
-   * Call this when app is closing or unmounting
+   * SDK 54 requires proper cleanup
    */
   async cleanup() {
     this.stopBGM();
@@ -182,6 +203,7 @@ class SoundManager {
     }
     
     this.sounds = {};
+    this.isInitialized = false;
   }
 }
 

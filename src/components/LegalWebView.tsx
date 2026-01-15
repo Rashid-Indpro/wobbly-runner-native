@@ -15,7 +15,19 @@ const LegalWebView: React.FC<LegalWebViewProps> = ({ url, title, onBack }) => {
   const openInBrowser = async () => {
     try {
       console.log(`🌐 Opening ${title} in web browser`);
-      await WebBrowser.openBrowserAsync(url);
+      
+      // SDK 54 compatible options
+      await WebBrowser.openBrowserAsync(url, {
+        // iOS options
+        controlsColor: '#4338ca',
+        dismissButtonStyle: 'close',
+        readerMode: false,
+        
+        // Android options
+        toolbarColor: '#4338ca',
+        enableBarCollapsing: false,
+        showInRecents: false,
+      });
     } catch (error) {
       console.error(`❌ Error opening legal page: ${title}`, error);
     }
