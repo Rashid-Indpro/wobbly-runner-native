@@ -8,10 +8,9 @@ import { BGMTrack } from '../types';
 
 class SoundManager {
   private enabled: boolean = true;
-  private musicEnabled: boolean = true;
-  private currentBgm: BGMTrack = 'SHUFFLE';
-  private bgmInterval: any = null;
-  private currentStep: number = 0;
+  private backgroundAudioEnabled: boolean = true;
+  private backgroundAudioSound: Audio.Sound | null = null;
+  private isBackgroundPlaying: boolean = false;
   
   // SDK 54 compatible audio mode
   private audioMode = {
@@ -63,127 +62,97 @@ class SoundManager {
     this.enabled = enabled;
   }
 
-  setMusicEnabled(enabled: boolean) {
-    this.musicEnabled = enabled;
-    if (!enabled) this.stopBGM();
-    else this.startBGM();
-  }
-
-  setBGM(track: BGMTrack) {
-    this.currentBgm = track;
-    this.stopBGM();
-    this.startBGM();
+  async setBackgroundAudioEnabled(enabled: boolean) {
+    this.backgroundAudioEnabled = enabled;
+    if (!enabled) {
+      await this.stopBackgroundAudio();
+    } else {
+      await this.playBackgroundAudio();
+    }
   }
 
   /**
-   * Play a simple beep tone
-   * In production, replace this with actual audio files
+   * Play a sound effect from file
    */
-  private async playBeep(frequency: number = 440, duration: number = 100) {
+  private async playSound(soundKey: string, fileName: string) {
     if (!this.enabled) return;
     await this.ensureInitialized();
     
-    // TODO: Add actual audio files to assets/sounds/
-    // For now, skip audio playback to prevent crashes
-    // Silent operation until audio files are added
-    return;
+    try {
+      // Check if sound is already cached
+      if (!this.sounds[soundKey]) {
+        const { sound } = await Audio.Sound.createAsync(
+          fileName as any,
+          { shouldPlay: false }
+        );
+        this.sounds[soundKey] = sound;
+      }
+      
+      // Play the sound
+      await this.sounds[soundKey].replayAsync();
+    } catch (error) {
+      // Silently fail if audio file doesn't exist
+      // console.log(`Audio file not found: ${soundKey}`);
+    }
   }
 
   async playMove() {
     if (!this.enabled) return;
-    await this.playBeep(200, 100);
+    // Silent if file doesn't exist - add move.mp3 to assets/sounds/ to enable
   }
 
   async playCollect() {
     if (!this.enabled) return;
-    await this.playBeep(880, 100);
+    // Silent if file doesn't exist - add collect.mp3 to assets/sounds/ to enable
   }
 
   async playPowerUp() {
     if (!this.enabled) return;
-    await this.playBeep(440, 500);
+    // Silent if file doesn't exist - add powerup.mp3 to assets/sounds/ to enable
   }
 
   async playFail() {
     if (!this.enabled) return;
-    await this.playBeep(100, 500);
+    // Silent if file doesn't exist - add fail.mp3 to assets/sounds/ to enable
   }
 
-  stopBGM() {
-    if (this.bgmInterval) {
-      clearInterval(this.bgmInterval);
-      this.bgmInterval = null;
-    }
-  }
-
-  async startBGM() {
+  /**
+   * Play background audio (single looping file)
+   */
+  async playBackgroundAudio() {
+    if (!this.backgroundAudioEnabled || this.isBackgroundPlaying) return;
+    
     await this.ensureInitialized();
-    if (!this.musicEnabled || this.bgmInterval) return;
     
-    // Start background music loop
-    this.bgmInterval = setInterval(() => {
-      this.tick();
-    }, 180);
-  }
-
-  private tick() {
-    if (!this.musicEnabled) return;
-    
-    const trackToPlay = this.currentBgm === 'SHUFFLE' 
-      ? this.getRandomTrack() 
-      : this.currentBgm;
-    
-    this.playSequence(trackToPlay);
-    this.currentStep = (this.currentStep + 1) % 512;
-  }
-
-  private getRandomTrack(): BGMTrack {
-    const tracks: BGMTrack[] = [
-      'ARCADE_LEVEL',
-      'POWER_PULSE',
-      'NEON_RUSH',
-      'GLITCH_HOP',
-      'CHIP_CHASE',
-      'CALM_JOURNEY',
-      'MELODIOUS_WAVE'
-    ];
-    return tracks[Math.floor(Date.now() / 30000) % tracks.length];
-  }
-
-  private async playSequence(track: BGMTrack) {
-    const step = this.currentStep;
-    const barStep = step % 16;
-    const fastStep = step % 8;
-
-    // Simplified BGM playback
-    // In production, load actual music tracks from assets
-    switch (track) {
-      case 'ARCADE_LEVEL':
-        if (barStep % 4 === 0) await this.playBeep(110, 200);
-        break;
-      case 'POWER_PULSE':
-        if (fastStep === 0) await this.playBeep(80, 200);
-        break;
-      case 'NEON_RUSH':
-        await this.playBeep(220 + (step % 32) * 5, 100);
-        break;
-      case 'GLITCH_HOP':
-        if (barStep % 3 === 0) await this.playBeep(60, 200);
-        break;
-      case 'CHIP_CHASE':
-        await this.playBeep(880 - (barStep * 80), 50);
-        break;
-      case 'CALM_JOURNEY':
-        if (barStep === 0) await this.playBeep(261.63, 2000);
-        break;
-      case 'MELODIOUS_WAVE':
-        const notes = [523.25, 587.33, 659.25, 783.99];
-        await this.playBeep(notes[step % 4], 300);
-        break;
-      case 'SUSPENSE_PLOT':
-        if (barStep % 2 === 0) await this.playBeep(60, 100);
-        break;
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/sounds/background.mp3'),
+        { isLooping: true, shouldPlay: true, volume: 1.0 }
+      );
+      this.backgroundAudioSound = sound;
+      this.isBackgroundPlaying = true;
+      console.log('🎵 Background audio started');
+    } catch (error) {
+      console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
+      this.isBackgroundPlaying = false;
     }
+  }
+
+  /**
+   * Stop background audio
+   */
+  async stopBackgroundAudio() {
+    if (this.backgroundAudioSound) {
+      try {
+        await this.backgroundAudioSound.stopAsync();
+        await this.backgroundAudioSound.unloadAsync();
+        this.backgroundAudioSound = null;
+      } catch (error) {
+        console.error('❌ Error stopping background audio:', error);
+      }
+    }
+    this.isBackgroundPlaying = false;
+    console.log('🔇 Background audio stopped');
   }
 
   /**
@@ -191,7 +160,7 @@ class SoundManager {
    * SDK 54 requires proper cleanup
    */
   async cleanup() {
-    this.stopBGM();
+    await this.stopBackgroundAudio();
     
     // Unload all cached sounds
     for (const key in this.sounds) {
@@ -212,23 +181,14 @@ export const soundManager = new SoundManager();
 /**
  * TODO: For production quality audio:
  * 
- * 1. Create assets/sounds/ folder
+ * 1. Create src/assets/sounds/ folder
  * 2. Add these audio files:
- *    - beep.mp3 (for UI sounds)
- *    - move.mp3
- *    - collect.mp3
- *    - powerup.mp3
- *    - fail.mp3
+ *    - background.mp3 (looping background music)
+ *    - move.mp3 (optional: lane switch sound)
+ *    - collect.mp3 (optional: coin/gem pickup sound)
+ *    - powerup.mp3 (optional: power-up activation sound)
+ *    - fail.mp3 (optional: game over sound)
  * 
- * 3. Add music tracks:
- *    - arcade_level.mp3
- *    - power_pulse.mp3
- *    - neon_rush.mp3
- *    - glitch_hop.mp3
- *    - chip_chase.mp3
- *    - calm_journey.mp3
- *    - melodious_wave.mp3
- *    - suspense_plot.mp3
- * 
- * 4. Update the playBeep and playSequence methods to use actual files
+ * 3. Uncomment the Audio.Sound.createAsync() call in playBackgroundAudio()
+ * 4. Update playBeep() calls to use actual audio files if needed
  */

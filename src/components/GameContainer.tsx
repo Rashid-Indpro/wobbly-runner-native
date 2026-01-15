@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration } from 'react-native';
 import { Settings, PowerUp, PowerUpType, Obstacle, Collectible, Skin, ObstacleBehavior } from '../types';
 import { POWER_UPS, INITIAL_SPEED, SPAWN_RATE, COIN_VALUE } from '../constants';
 import UIOverlay from './UIOverlay';
@@ -94,15 +94,15 @@ const GameContainer: React.FC<GameContainerProps> = ({
         o => Math.abs(o.y - gameStateRef.current.player.y) > 300
       );
       setActivePower({ type: PowerUpType.INVINCIBLE, start: Date.now(), expiry: Date.now() + 3000 });
-      soundManager.startBGM();
+      soundManager.playBackgroundAudio();
     }
     wasAdShowingRef.current = isExternalAdShowing;
   }, [isExternalAdShowing]);
 
   // Music management
   useEffect(() => {
-    if (isExternalAdShowing) soundManager.stopBGM();
-    else if (!isPaused && !showGameOver) soundManager.startBGM();
+    if (isExternalAdShowing) soundManager.stopBackgroundAudio();
+    else if (!isPaused && !showGameOver) soundManager.playBackgroundAudio();
   }, [isExternalAdShowing, isPaused, showGameOver]);
 
   // Game loop
@@ -214,7 +214,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
           state.gameOver = true;
           setShowGameOver(true);
           soundManager.playFail();
-          soundManager.stopBGM();
+          soundManager.stopBackgroundAudio();
+          if (settings.vibrationEnabled) {
+            Vibration.vibrate(200); // Heavy vibration for game over
+          }
           break;
         }
         
@@ -239,10 +242,16 @@ const GameContainer: React.FC<GameContainerProps> = ({
           if (coll.type === 'COIN') {
             console.log('🪙 Coin collected! Total coins:', Math.floor(state.coins + (currentCoinValue * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * activeSkin.perks.coinMult);
+            if (settings.vibrationEnabled) {
+              Vibration.vibrate(10); // Light tap for coin
+            }
           }
           else if (coll.type === 'GEM') {
             console.log('💎 Gem collected! Total coins:', Math.floor(state.coins + (currentCoinValue * 5 * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * 5 * activeSkin.perks.coinMult);
+            if (settings.vibrationEnabled) {
+              Vibration.vibrate([0, 20, 10, 20]); // Double tap for gem
+            }
           }
           else if (coll.powerType) {
             console.log('⚡ Power-up collected:', coll.powerType);
@@ -253,6 +262,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
             });
             state.powerUpsUsed++;
             soundManager.playPowerUp();
+            if (settings.vibrationEnabled) {
+              Vibration.vibrate(50); // Medium vibration for power-up
+            }
           }
           setCoinsCollected(Math.floor(state.coins));
           soundManager.playCollect();
@@ -294,6 +306,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
       });
       gameStateRef.current.powerUpsUsed++;
       soundManager.playPowerUp();
+      if (settings.vibrationEnabled) {
+        Vibration.vibrate(50); // Medium vibration for power-up activation
+      }
     }
   };
 
@@ -309,6 +324,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
           gameStateRef.current.player.lane = lane;
           gameStateRef.current.player.targetX = getLaneX(lane, gameStateRef.current.canvasWidth);
           soundManager.playMove();
+          if (settings.vibrationEnabled) {
+            Vibration.vibrate(5); // Very light tap for lane switch
+          }
         }
       },
     })
@@ -417,8 +435,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
         } : null} 
         onPause={() => { 
           setIsPaused(!isPaused); 
-          if (!isPaused) soundManager.stopBGM(); 
-          else soundManager.startBGM(); 
+          if (!isPaused) soundManager.stopBackgroundAudio(); 
+          else soundManager.playBackgroundAudio(); 
         }} 
         isPaused={isPaused} 
         equippedPowers={equippedPowers}

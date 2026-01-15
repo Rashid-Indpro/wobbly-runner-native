@@ -14,14 +14,10 @@ interface SettingsScreenProps {
 }
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBack, onShowTutorial, onOpenLegalPage }) => {
-  const [view, setView] = useState<'MAIN' | 'ABOUT' | 'POLICY' | 'TERMS' | 'CONSENT' | 'BGM'>('MAIN');
+  const [view, setView] = useState<'MAIN' | 'ABOUT' | 'POLICY' | 'TERMS' | 'CONSENT'>('MAIN');
 
   const toggle = (key: keyof Settings) => {
     onSave({ ...settings, [key]: !settings[key] });
-  };
-
-  const handleBGMSelect = (track: BGMTrack) => {
-    onSave({ ...settings, selectedBGM: track });
   };
 
   const handleResetProfile = () => {
@@ -42,52 +38,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
     );
   };
 
-  const bgmTracks: BGMTrack[] = [
-    'SHUFFLE', 'ARCADE_LEVEL', 'POWER_PULSE', 'NEON_RUSH', 'GLITCH_HOP', 'CHIP_CHASE', 'CALM_JOURNEY', 'MELODIOUS_WAVE', 'SUSPENSE_PLOT'
-  ];
-
   if (view === 'ABOUT') return <AboutUs onBack={() => setView('MAIN')} onOpenLegalPage={onOpenLegalPage || (() => {})} />;
-
-  // BGM Selection View
-  if (view === 'BGM') {
-    return (
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <View style={styles.headerRow}>
-            <Text style={styles.viewTitle}>Audio Themes</Text>
-            <TouchableOpacity 
-              onPress={() => setView('MAIN')} 
-              style={styles.headerCloseButton}
-              activeOpacity={0.7}
-            >
-              <Icon name="chevron-left" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <ScrollView style={styles.bgmScrollView} contentContainerStyle={styles.bgmScrollContent}>
-          {bgmTracks.map(t => (
-            <TouchableOpacity
-              key={t}
-              onPress={() => handleBGMSelect(t)}
-              style={[
-                styles.bgmTrackButton,
-                settings.selectedBGM === t && styles.bgmTrackButtonSelected
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text style={[
-                styles.bgmTrackText,
-                settings.selectedBGM === t && styles.bgmTrackTextSelected
-              ]}>
-                {t.replace('_', ' ')}
-              </Text>
-              {settings.selectedBGM === t && <View style={styles.activeDot} />}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    );
-  }
 
   // Legal & Data Views
   if (view === 'POLICY' || view === 'TERMS' || view === 'CONSENT') {
@@ -214,23 +165,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
             icon={settings.vibrationEnabled ? "bell" : "bell-off"}
             onToggle={() => toggle('vibrationEnabled')} 
           />
-          
-          <TouchableOpacity 
-            onPress={() => setView('BGM')} 
-            style={styles.bgmSelectButton}
-            activeOpacity={0.7}
-          >
-            <View style={styles.bgmSelectLeft}>
-              <View style={styles.bgmIconContainer}>
-                <Icon name="headphones" size={18} color="#818CF8" />
-              </View>
-              <Text style={styles.bgmSelectLabel}>Audio Theme</Text>
-            </View>
-            <View style={styles.bgmSelectRight}>
-              <Text style={styles.bgmSelectValue}>{settings.selectedBGM.replace('_', ' ')}</Text>
-              <Icon name="chevron-right" size={14} color="#52525B" />
-            </View>
-          </TouchableOpacity>
         </View>
 
         {/* Quick Links */}

@@ -1,0 +1,35 @@
+📁 AUDIO FILES NEEDED
+
+Please add the following MP3 files to this directory:
+
+REQUIRED:
+✅ background.mp3  - Background music (will loop continuously)
+
+OPTIONAL (for enhanced sound effects):
+✅ move.mp3        - Lane switch sound (short beep/click)
+✅ collect.mp3     - Coin/gem collection sound (ding/chime)
+✅ powerup.mp3     - Power-up activation sound (whoosh/power sound)
+✅ fail.mp3        - Game over sound (crash/fail sound)
+
+FILE REQUIREMENTS:
+- Format: MP3 (recommended for mobile)
+- Size: Keep files small (< 1MB each for effects, < 5MB for background)
+- Sample rate: 44.1kHz or 48kHz
+- Bit rate: 128-192 kbps for background, 64-128 kbps for effects
+
+ROYALTY-FREE SOURCES:
+- Freesound.org
+- Zapsplat.com
+- Pixabay.com/music
+- Incompetech.com
+- YouTube Audio Library
+
+After adding files:
+1. Delete this PLACE_AUDIO_FILES_HERE.txt file
+2. The app will automatically load and play them
+3. Test in the app to verify they work
+
+Current Status:
+⏳ Waiting for audio files to be added
+✅ Code is ready to use them
+✅ All features implemented (background music, sound effects, vibration)

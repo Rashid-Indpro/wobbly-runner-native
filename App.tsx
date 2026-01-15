@@ -95,8 +95,7 @@ const App: React.FC = () => {
       if (savedSettings) {
         setSettings(prev => ({ ...prev, ...savedSettings }));
         soundManager.setEnabled(savedSettings.soundEnabled);
-        soundManager.setMusicEnabled(savedSettings.musicEnabled);
-        soundManager.setBGM(savedSettings.selectedBGM);
+        soundManager.setBackgroundAudioEnabled(savedSettings.musicEnabled);
       }
     };
 
@@ -112,7 +111,7 @@ const App: React.FC = () => {
       console.log('🏠 Returning user - Going to main menu');
       setGameState('MAIN_MENU');
     }
-    soundManager.startBGM();
+    soundManager.playBackgroundAudio();
     updateAchievements({ score: 0, coins: 0, powerUpsUsed: 0, distanceTraveled: 0 }, true);
   };
 
@@ -120,7 +119,7 @@ const App: React.FC = () => {
     console.log('🎯 User requested game start');
     if (Math.random() < 0.2) { 
       console.log('📺 Showing ad before game start');
-      soundManager.stopBGM();
+      soundManager.stopBackgroundAudio();
       setAdPurpose('START');
       setGameState('AD_WATCHING');
     } else {
@@ -176,13 +175,12 @@ const App: React.FC = () => {
   const handleSaveSettings = (newSettings: Settings) => {
     setSettings(newSettings);
     soundManager.setEnabled(newSettings.soundEnabled);
-    soundManager.setMusicEnabled(newSettings.musicEnabled);
-    soundManager.setBGM(newSettings.selectedBGM);
+    soundManager.setBackgroundAudioEnabled(newSettings.musicEnabled);
     setItem('settings', newSettings);
   };
 
   const requestAd = (purpose: 'REVIVE' | 'STORE' | 'SKIN' | 'GET_COINS', item: any = null) => {
-    soundManager.stopBGM();
+    soundManager.stopBackgroundAudio();
     setAdPurpose(purpose);
     setAdPurposeItem(item);
     setGameState('AD_WATCHING');
@@ -240,7 +238,7 @@ const App: React.FC = () => {
   };
 
   const handleAdComplete = () => {
-    soundManager.startBGM();
+    soundManager.playBackgroundAudio();
     if (adPurpose === 'STORE' && adPurposeItem) {
       const newOwned = { ...ownedPowerUses };
       newOwned[adPurposeItem.id] = (newOwned[adPurposeItem.id] || 0) + 3;
