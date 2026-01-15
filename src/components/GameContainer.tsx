@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration, Animated } from 'react-native';
 import { Settings, PowerUp, PowerUpType, Obstacle, Collectible, Skin, ObstacleBehavior } from '../types';
 import { POWER_UPS, INITIAL_SPEED, SPAWN_RATE, COIN_VALUE } from '../constants';
 import UIOverlay from './UIOverlay';
@@ -59,6 +59,11 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [reviveCount, setReviveCount] = useState(0);
   const [, forceUpdate] = useState(0);
   
+  // Character effect animations
+  const collectEffectScale = useRef(new Animated.Value(1)).current;
+  const collectEffectGlow = useRef(new Animated.Value(0)).current;
+  const collectEffectRotation = useRef(new Animated.Value(0)).current;
+  
   const gameStateRef = useRef({
     player: { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 150, targetX: SCREEN_WIDTH / 2, lane: 1, width: 40, height: 40, wobble: 0 },
     obstacles: [] as Obstacle[],
@@ -78,6 +83,70 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const wasAdShowingRef = useRef(false);
 
   const getLaneX = (lane: number, canvasWidth: number) => (canvasWidth / 3) * lane + (canvasWidth / 3) / 2;
+
+  // Trigger joyful collection effect
+  const triggerCollectEffect = (type: 'COIN' | 'GEM' | 'POWER_UP') => {
+    // Reset all animations to initial state
+    collectEffectScale.setValue(1);
+    collectEffectGlow.setValue(0);
+    collectEffectRotation.setValue(0);
+
+    // Different effect intensity based on collectible type
+    const scaleTarget = type === 'GEM' ? 1.35 : type === 'POWER_UP' ? 1.4 : 1.25;
+    const glowTarget = type === 'GEM' ? 0.8 : type === 'POWER_UP' ? 1 : 0.6;
+    const rotationTarget = type === 'POWER_UP' ? 0.2 : 0.1;
+
+    // Parallel animations for smooth, satisfying effect
+    // Using useNativeDriver: false for all to support shadow effects
+    Animated.parallel([
+      // Scale bounce: quick up, smooth down
+      Animated.sequence([
+        Animated.spring(collectEffectScale, {
+          toValue: scaleTarget,
+          tension: 180,
+          friction: 8,
+          useNativeDriver: false,
+        }),
+        Animated.spring(collectEffectScale, {
+          toValue: 1,
+          tension: 120,
+          friction: 10,
+          useNativeDriver: false,
+        }),
+      ]),
+      // Glow effect
+      Animated.sequence([
+        Animated.timing(collectEffectGlow, {
+          toValue: glowTarget,
+          duration: 150,
+          useNativeDriver: false,
+        }),
+        Animated.timing(collectEffectGlow, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+      ]),
+      // Subtle rotation wobble
+      Animated.sequence([
+        Animated.timing(collectEffectRotation, {
+          toValue: rotationTarget,
+          duration: 100,
+          useNativeDriver: false,
+        }),
+        Animated.timing(collectEffectRotation, {
+          toValue: -rotationTarget,
+          duration: 120,
+          useNativeDriver: false,
+        }),
+        Animated.timing(collectEffectRotation, {
+          toValue: 0,
+          duration: 100,
+          useNativeDriver: false,
+        }),
+      ]),
+    ]).start();
+  };
 
   const getSpeedMultiplier = (internalScore: number) => {
     const s = Math.floor(internalScore / 10);
@@ -242,6 +311,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           if (coll.type === 'COIN') {
             console.log('🪙 Coin collected! Total coins:', Math.floor(state.coins + (currentCoinValue * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * activeSkin.perks.coinMult);
+            triggerCollectEffect('COIN'); // ✨ EFFECT TRIGGER
             if (settings.vibrationEnabled) {
               Vibration.vibrate(10); // Light tap for coin
             }
@@ -249,6 +319,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
           else if (coll.type === 'GEM') {
             console.log('💎 Gem collected! Total coins:', Math.floor(state.coins + (currentCoinValue * 5 * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * 5 * activeSkin.perks.coinMult);
+            triggerCollectEffect('GEM'); // ✨ EFFECT TRIGGER
             if (settings.vibrationEnabled) {
               Vibration.vibrate([0, 20, 10, 20]); // Double tap for gem
             }
@@ -261,6 +332,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
               expiry: Date.now() + POWER_UPS[coll.powerType].duration + activeSkin.perks.invincibilityBonus 
             });
             state.powerUpsUsed++;
+            triggerCollectEffect('POWER_UP'); // ✨ EFFECT TRIGGER
             soundManager.playPowerUp();
             if (settings.vibrationEnabled) {
               Vibration.vibrate(50); // Medium vibration for power-up
@@ -360,7 +432,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         })}
 
         {/* Player */}
-        <View
+        <Animated.View
           style={[
             styles.player,
             {
@@ -370,12 +442,30 @@ const GameContainer: React.FC<GameContainerProps> = ({
               height: 48 * (activePower?.type === PowerUpType.GIANT ? 1.9 : (activePower?.type === PowerUpType.TINY ? 0.6 : 1)),
               backgroundColor: activePower ? POWER_UPS[activePower.type].color : activeSkin.color,
               opacity: activePower?.type === PowerUpType.GHOST_WALK ? 0.5 : 1,
+              transform: [
+                { scale: collectEffectScale },
+                { rotate: collectEffectRotation.interpolate({
+                  inputRange: [-1, 1],
+                  outputRange: ['-180deg', '180deg']
+                }) }
+              ],
+              shadowColor: '#FFD700',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: collectEffectGlow,
+              shadowRadius: collectEffectGlow.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 20]
+              }),
+              elevation: collectEffectGlow.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 8]
+              }),
             },
           ]}
         />
 
         {/* Player emoji */}
-        <Text
+        <Animated.Text
           style={[
             styles.emoji,
             {
@@ -383,11 +473,18 @@ const GameContainer: React.FC<GameContainerProps> = ({
               top: state.player.y - 16 * (activePower?.type === PowerUpType.GIANT ? 1.9 : (activePower?.type === PowerUpType.TINY ? 0.6 : 1)),
               fontSize: 32 * (activePower?.type === PowerUpType.GIANT ? 1.9 : (activePower?.type === PowerUpType.TINY ? 0.6 : 1)),
               opacity: activePower?.type === PowerUpType.GHOST_WALK ? 0.5 : 1,
+              transform: [
+                { scale: collectEffectScale },
+                { rotate: collectEffectRotation.interpolate({
+                  inputRange: [-1, 1],
+                  outputRange: ['-180deg', '180deg']
+                }) }
+              ],
             },
           ]}
         >
           {activeSkin.icon}
-        </Text>
+        </Animated.Text>
       </View>
 
       {/* Collectibles */}
