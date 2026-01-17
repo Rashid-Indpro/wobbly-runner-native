@@ -97,23 +97,19 @@ class SoundManager {
   }
 
   async playMove() {
-    if (!this.enabled) return;
-    // Silent if file doesn't exist - add move.mp3 to assets/sounds/ to enable
+    await this.playSound('move', require('../assets/sounds/move.mp3'));
   }
 
   async playCollect() {
-    if (!this.enabled) return;
-    // Silent if file doesn't exist - add collect.mp3 to assets/sounds/ to enable
+    await this.playSound('collect', require('../assets/sounds/collect.mp3'));
   }
 
   async playPowerUp() {
-    if (!this.enabled) return;
-    // Silent if file doesn't exist - add powerup.mp3 to assets/sounds/ to enable
+    await this.playSound('powerup', require('../assets/sounds/powerup.mp3'));
   }
 
   async playFail() {
-    if (!this.enabled) return;
-    // Silent if file doesn't exist - add fail.mp3 to assets/sounds/ to enable
+    await this.playSound('fail', require('../assets/sounds/fail.mp3'));
   }
 
   /**
