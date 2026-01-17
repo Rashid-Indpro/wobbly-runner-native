@@ -126,7 +126,7 @@ class SoundManager {
     try {
       const { sound } = await Audio.Sound.createAsync(
         require('../assets/sounds/background.mp3'),
-        { isLooping: true, shouldPlay: true, volume: 1.0 }
+        { isLooping: true, shouldPlay: true, volume: 0.5 }
       );
       this.backgroundAudioSound = sound;
       console.log('🎵 Background audio started');
