@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Image, Animated, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import LinearGradient from './LinearGradient';
@@ -150,6 +150,8 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
             description="The technical heartbeat of the project. Rashid's expertise in high-performance algorithms ensures that even with hundreds of physics-based obstacles, the game remains buttery smooth."
             tags={["Engine Dev", "Optimization", "Logic Architect"]}
             onClick={() => setViewerImage({ image: RASHID_IMAGE, name: "Md Rashid" })}
+            linkedinUrl="https://www.linkedin.com/in/md-rashid-computerengineer/"
+            email="mdrashid06450@gmail.com"
           />
 
           <FounderCard 
@@ -160,6 +162,8 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
             description="The visionary mind behind the game's soul. Tanveer specializes in human-centric design, ensuring that every wobbly movement feels responsive and every color palette sparks joy."
             tags={["UX Lead", "Game Designer", "Visual Master"]}
             onClick={() => setViewerImage({ image: TANVEER_IMAGE, name: "Tanveer Alam" })}
+            linkedinUrl="https://www.linkedin.com/in/tanveer-alam-6858153a6/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+            email="tanveeralamstar01@gmail.com"
           />
         </View>
 
@@ -229,13 +233,15 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
         transparent
         animationType="fade"
         onRequestClose={() => setViewerImage(null)}
+        statusBarTranslucent
       >
         {viewerImage && (
-          <TouchableOpacity 
-            style={styles.modalOverlay}
-            activeOpacity={1}
-            onPress={() => setViewerImage(null)}
-          >
+          <View style={styles.modalWrapper}>
+            <TouchableOpacity 
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPress={() => setViewerImage(null)}
+            >
             <TouchableOpacity 
               style={styles.modalCloseButton}
               onPress={() => setViewerImage(null)}
@@ -259,6 +265,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
               </View>
             </TouchableOpacity>
           </TouchableOpacity>
+          </View>
         )}
       </Modal>
     </SafeAreaView>
@@ -273,9 +280,11 @@ interface FounderCardProps {
   description: string;
   tags: string[];
   onClick: () => void;
+  linkedinUrl: string;
+  email: string;
 }
 
-const FounderCard: React.FC<FounderCardProps> = ({ name, role, color, image, description, tags, onClick }) => {
+const FounderCard: React.FC<FounderCardProps> = ({ name, role, color, image, description, tags, onClick, linkedinUrl, email }) => {
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -338,10 +347,18 @@ const FounderCard: React.FC<FounderCardProps> = ({ name, role, color, image, des
         </View>
 
         <View style={styles.founderSocials}>
-          <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
-            <Icon name="github" size={18} color="#71717A" />
+          <TouchableOpacity 
+            style={styles.socialButton} 
+            activeOpacity={0.7}
+            onPress={() => Linking.openURL(`mailto:${email}`)}
+          >
+            <Icon name="mail" size={18} color="#71717A" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton} activeOpacity={0.7}>
+          <TouchableOpacity 
+            style={styles.socialButton} 
+            activeOpacity={0.7}
+            onPress={() => Linking.openURL(linkedinUrl)}
+          >
             <Icon name="linkedin" size={18} color="#71717A" />
           </TouchableOpacity>
         </View>
@@ -721,9 +738,12 @@ const styles = StyleSheet.create({
     letterSpacing: 4,
     textAlign: 'center',
   },
-  modalOverlay: {
+  modalWrapper: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.98)',
+  },
+  modalOverlay: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
