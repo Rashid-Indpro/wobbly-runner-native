@@ -622,6 +622,7 @@ const styles = StyleSheet.create({
   founderImage: {
     width: '100%',
     height: '100%',
+    objectFit: 'cover',
   },
   founderImageOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -751,7 +752,7 @@ const styles = StyleSheet.create({
   modalImage: {
     width: '100%',
     height: undefined,
-    aspectRatio: 1,
+    aspectRatio: 0.75,
     maxHeight: 512,
     borderRadius: 56,
     shadowColor: 'rgba(255, 255, 255, 0.15)',
