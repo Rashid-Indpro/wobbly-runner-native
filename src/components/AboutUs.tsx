@@ -143,16 +143,6 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
         {/* Founder Cards */}
         <View style={styles.foundersContainer}>
           <FounderCard 
-            name="Tanveer Alam" 
-            role="Lead Designer & Creative Director" 
-            color="#F97316" 
-            image={TANVEER_IMAGE}
-            description="The visionary mind behind the game's soul. Tanveer specializes in human-centric design, ensuring that every wobbly movement feels responsive and every color palette sparks joy."
-            tags={["UX Lead", "Game Designer", "Visual Master"]}
-            onClick={() => setViewerImage({ image: TANVEER_IMAGE, name: "Tanveer Alam" })}
-          />
-
-          <FounderCard 
             name="Md Rashid" 
             role="Technical Lead & Engine Architect" 
             color="#3B82F6" 
@@ -160,6 +150,16 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
             description="The technical heartbeat of the project. Rashid's expertise in high-performance algorithms ensures that even with hundreds of physics-based obstacles, the game remains buttery smooth."
             tags={["Engine Dev", "Optimization", "Logic Architect"]}
             onClick={() => setViewerImage({ image: RASHID_IMAGE, name: "Md Rashid" })}
+          />
+
+          <FounderCard 
+            name="Tanveer Alam" 
+            role="Lead Designer & Creative Director" 
+            color="#F97316" 
+            image={TANVEER_IMAGE}
+            description="The visionary mind behind the game's soul. Tanveer specializes in human-centric design, ensuring that every wobbly movement feels responsive and every color palette sparks joy."
+            tags={["UX Lead", "Game Designer", "Visual Master"]}
+            onClick={() => setViewerImage({ image: TANVEER_IMAGE, name: "Tanveer Alam" })}
           />
         </View>
 
