@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Animated, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Animated, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Achievement, Rarity } from '../types';
 
 interface AchievementsScreenProps {
@@ -18,6 +21,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(5)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
+  const certificateRef = useRef<View>(null);
 
   useEffect(() => {
     loadUserName();
@@ -109,12 +113,58 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!selectedAward || !selectedAward.isUnlocked) return;
-    const message = `🚀 MY AURA IS PEAK! I just became the ${getPrestigeSalutation(selectedAward.rarity)}! 🤪`;
-    Alert.alert('Share Achievement', message, [
-      { text: 'OK', style: 'default' }
-    ]);
+    
+    try {
+      // Check if sharing is available on this device
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        Alert.alert('Sharing Not Available', 'Sharing is not available on this device.');
+        return;
+      }
+
+      // Show loading state (optional)
+      Alert.alert('Preparing Certificate', 'Capturing your achievement...');
+
+      // Capture the certificate view as an image
+      if (!certificateRef.current) {
+        Alert.alert('Error', 'Unable to capture certificate. Please try again.');
+        return;
+      }
+
+      const uri = await captureRef(certificateRef, {
+        format: 'png',
+        quality: 1,
+      });
+
+      // Create a temporary file path for the captured image
+      const fileUri = `${FileSystem.cacheDirectory}wobbly_runner_certificate_${Date.now()}.png`;
+      
+      // Move the captured image to the cache directory
+      await FileSystem.moveAsync({
+        from: uri,
+        to: fileUri,
+      });
+
+      // Share the certificate with a message including the app download link
+      const downloadLink = 'https://example.com';
+      const message = `🚀 MY AURA IS PEAK! I just became the ${getPrestigeSalutation(selectedAward.rarity)}! 🤪\n\nDownload the app: ${downloadLink}`;
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: 'image/png',
+        dialogTitle: 'Share Your Achievement',
+        UTI: 'public.png',
+      });
+
+      // Clean up the temporary file after sharing
+      // Note: We don't delete immediately as the sharing might still be in progress
+      // The OS will clean up the cache directory eventually
+      
+    } catch (error) {
+      console.error('Error sharing certificate:', error);
+      Alert.alert('Share Failed', 'Unable to share the certificate. Please try again.');
+    }
   };
 
   return (
@@ -229,7 +279,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
               contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={false}
             >
-              <View style={styles.modalCard}>
+              <View ref={certificateRef} collapsable={false} style={styles.modalCard}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalHeaderEmoji}>🤪</Text>
                   <Text style={styles.modalHeaderTitle}>Wobbly Runner</Text>
@@ -587,64 +637,68 @@ const styles = StyleSheet.create({
   modalScroll: {
     flex: 1,
     width: '100%',
-    maxWidth: 576,
+    maxWidth: 768,
   },
   modalScrollContent: {
     padding: 16,
+    alignItems: 'center',
   },
   modalCard: {
     backgroundColor: '#020617',
     borderWidth: 4,
     borderColor: 'rgba(99, 102, 241, 0.3)',
-    borderRadius: 56,
+    borderRadius: 24,
     shadowColor: 'rgba(79, 70, 229, 0.3)',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 100,
     elevation: 30,
-    padding: 32,
+    padding: 24,
+    paddingHorizontal: 32,
     alignItems: 'center',
+    width: '100%',
+    maxWidth: 720,
   },
   modalHeader: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   modalHeaderEmoji: {
-    fontSize: 48,
-    marginBottom: 8,
+    fontSize: 32,
+    marginBottom: 4,
   },
   modalHeaderTitle: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '900',
     color: '#FFFFFF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   modalHeaderSubtitle: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
     color: '#818CF8',
     textTransform: 'uppercase',
-    letterSpacing: 5,
-    marginTop: 4,
+    letterSpacing: 4,
+    marginTop: 2,
   },
   modalIconContainer: {
     position: 'relative',
-    height: 160,
-    width: 160,
+    height: 100,
+    width: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   modalIconGlow: {
     position: 'absolute',
-    width: 160,
-    height: 160,
+    width: 100,
+    height: 100,
     backgroundColor: 'rgba(99, 102, 241, 0.2)',
-    borderRadius: 80,
+    borderRadius: 50,
   },
   modalIconText: {
-    fontSize: 120,
+    fontSize: 70,
     textShadowColor: 'rgba(99, 102, 241, 0.4)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 40,
@@ -661,12 +715,12 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   modalTitle: {
-    fontSize: 40,
+    fontSize: 28,
     fontWeight: '900',
     textTransform: 'uppercase',
-    letterSpacing: -1,
+    letterSpacing: -0.5,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
     color: '#FFFFFF',
   },
   modalTitleLocked: {
@@ -674,16 +728,16 @@ const styles = StyleSheet.create({
   },
   modalDetailsContainer: {
     width: '100%',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   modalSalutation: {
     color: '#818CF8',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
-    letterSpacing: 4,
+    letterSpacing: 3,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   nameInputContainer: {
     maxWidth: 384,
@@ -695,10 +749,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderBottomWidth: 2,
     borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 16,
+    paddingVertical: 12,
     textAlign: 'center',
     color: '#FFFFFF',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '900',
   },
   verificationPending: {
@@ -727,18 +781,18 @@ const styles = StyleSheet.create({
   },
   descriptionCard: {
     backgroundColor: 'rgba(79, 70, 229, 0.05)',
-    padding: 32,
-    borderRadius: 40,
+    padding: 20,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(99, 102, 241, 0.1)',
     width: '100%',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   descriptionText: {
     color: '#E2E8F0',
     fontWeight: '700',
-    fontSize: 18,
-    lineHeight: 28,
+    fontSize: 14,
+    lineHeight: 22,
     fontStyle: 'italic',
     textAlign: 'center',
   },
@@ -746,10 +800,10 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     gap: 16,
-    paddingTop: 40,
+    paddingTop: 20,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.05)',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   signatureBlock: {
     flex: 1,
@@ -773,12 +827,12 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     width: '100%',
-    marginBottom: 32,
+    marginBottom: 16,
   },
   shareButton: {
     backgroundColor: '#4F46E5',
-    paddingVertical: 20,
-    borderRadius: 24,
+    paddingVertical: 16,
+    borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
