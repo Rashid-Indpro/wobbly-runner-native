@@ -15,7 +15,7 @@ interface SettingsScreenProps {
 }
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBack, onShowTutorial, onOpenLegalPage }) => {
-  const [view, setView] = useState<'MAIN' | 'ABOUT' | 'POLICY' | 'TERMS' | 'CONSENT'>('MAIN');
+  const [view, setView] = useState<'MAIN' | 'ABOUT' | 'CONSENT'>('MAIN');
 
   const toggle = (key: keyof Settings) => {
     onSave({ ...settings, [key]: !settings[key] });
@@ -41,15 +41,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
 
   if (view === 'ABOUT') return <AboutUs onBack={() => setView('MAIN')} onOpenLegalPage={onOpenLegalPage || (() => {})} />;
 
-  // Legal & Data Views
-  if (view === 'POLICY' || view === 'TERMS' || view === 'CONSENT') {
+  // Ad Personalization View
+  if (view === 'CONSENT') {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         <View style={styles.headerContainer}>
           <View style={styles.headerRow}>
-            <Text style={styles.viewTitle}>
-              {view === 'CONSENT' ? 'Personalization' : view === 'POLICY' ? 'Privacy Policy' : 'Terms of Service'}
-            </Text>
+            <Text style={styles.viewTitle}>Personalization</Text>
             <TouchableOpacity 
               onPress={() => setView('MAIN')} 
               style={styles.headerCloseButton}
@@ -60,64 +58,33 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
           </View>
         </View>
         <ScrollView style={styles.legalScrollView} contentContainerStyle={styles.legalScrollContent}>
-          {view === 'CONSENT' && (
-            <View style={styles.consentContent}>
-              <Text style={styles.legalText}>
-                We respect your privacy. By enabling personalized ads, you help keep Wobbly Runner free for everyone. We never sell your personal identification data.
-              </Text>
-              <View style={styles.consentStatusCard}>
-                <Text style={styles.consentStatusLabel}>Current Status</Text>
-                <View style={[styles.consentStatusBadge, settings.hasConsented ? styles.consentActive : styles.consentInactive]}>
-                  <Text style={[styles.consentStatusText, settings.hasConsented ? styles.consentActiveText : styles.consentInactiveText]}>
-                    {settings.hasConsented ? 'Premium Data Sync Active' : 'Basic Ads Only'}
-                  </Text>
-                </View>
+          <View style={styles.consentContent}>
+            <Text style={styles.legalText}>
+              We respect your privacy. By enabling personalized ads, you help keep Wobbly Runner free for everyone. We never sell your personal identification data.
+            </Text>
+            <View style={styles.consentStatusCard}>
+              <Text style={styles.consentStatusLabel}>Current Status</Text>
+              <View style={[styles.consentStatusBadge, settings.hasConsented ? styles.consentActive : styles.consentInactive]}>
+                <Text style={[styles.consentStatusText, settings.hasConsented ? styles.consentActiveText : styles.consentInactiveText]}>
+                  {settings.hasConsented ? 'Premium Data Sync Active' : 'Basic Ads Only'}
+                </Text>
               </View>
-              <TouchableOpacity
-                onPress={() => { onSave({ ...settings, hasConsented: true }); setView('MAIN'); }}
-                style={styles.acceptButton}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.acceptButtonText}>Accept Personalization</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => { onSave({ ...settings, hasConsented: false }); setView('MAIN'); }}
-                style={styles.optOutButton}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.optOutButtonText}>Opt-Out</Text>
-              </TouchableOpacity>
             </View>
-          )}
-          {view === 'POLICY' && (
-            <View style={styles.legalTextContent}>
-              <Text style={styles.legalHeading}>Privacy Policy</Text>
-              <Text style={styles.legalText}>Last Updated: May 2024</Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>1. Data Collection:</Text> We do not collect Personally Identifiable Information (PII). We collect non-personal device IDs and gameplay statistics to improve performance.
-              </Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>2. Third-Party Services:</Text> We use Google AdMob for advertisements. These providers may use cookies and device identifiers to serve personalized content if you grant consent.
-              </Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>3. Children's Privacy:</Text> Wobbly Runner is family-friendly. We strictly adhere to COPPA and GDPR-K guidelines.
-              </Text>
-            </View>
-          )}
-          {view === 'TERMS' && (
-            <View style={styles.legalTextContent}>
-              <Text style={styles.legalHeading}>Terms of Service</Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>1. Acceptance:</Text> By playing Wobbly Runner, you agree to these terms.
-              </Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>2. Virtual Currency:</Text> "Coins" are virtual in-game items with no real-world monetary value.
-              </Text>
-              <Text style={styles.legalText}>
-                <Text style={styles.legalBold}>3. Fair Play:</Text> Users are prohibited from using scripts, hacks, or exploits.
-              </Text>
-            </View>
-          )}
+            <TouchableOpacity
+              onPress={() => { onSave({ ...settings, hasConsented: true }); setView('MAIN'); }}
+              style={styles.acceptButton}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.acceptButtonText}>Accept Personalization</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { onSave({ ...settings, hasConsented: false }); setView('MAIN'); }}
+              style={styles.optOutButton}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.optOutButtonText}>Opt-Out</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </SafeAreaView>
     );
@@ -187,19 +154,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
         {/* Info & Policy */}
         <View style={styles.menuCard}>
           <MenuLink 
-            label="Privacy Policy" 
-            icon="shield" 
-            onClick={() => setView('POLICY')} 
-          />
-          <MenuLink 
             label="Ad Personalization" 
             icon="lock" 
             onClick={() => setView('CONSENT')} 
-          />
-          <MenuLink 
-            label="Terms of Service" 
-            icon="check-circle" 
-            onClick={() => setView('TERMS')} 
           />
         </View>
 

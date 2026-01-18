@@ -288,6 +288,11 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
                         onChangeText={(text) => setUserName(text.toUpperCase())}
                         style={styles.nameInput}
                         placeholderTextColor="#27272A"
+                        autoComplete="off"
+                        autoCorrect={false}
+                        autoCapitalize="characters"
+                        spellCheck={false}
+                        keyboardType="default"
                       />
                     </View>
                   ) : (
