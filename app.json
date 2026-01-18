@@ -22,9 +22,7 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/wobbly-runner-native"
     },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "plugins": [
       [
         "expo-av",

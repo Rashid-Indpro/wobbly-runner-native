@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { captureRef } from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+import Share from 'react-native-share';
 import * as FileSystem from 'expo-file-system/legacy';
 import { Achievement, Rarity } from '../types';
 
@@ -117,28 +117,22 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
     if (!selectedAward || !selectedAward.isUnlocked) return;
     
     try {
-      // Check if sharing is available on this device
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert('Sharing Not Available', 'Sharing is not available on this device.');
-        return;
-      }
-
-      // Show loading state (optional)
-      Alert.alert('Preparing Certificate', 'Capturing your achievement...');
-
       // Capture the certificate view as an image
       if (!certificateRef.current) {
         Alert.alert('Error', 'Unable to capture certificate. Please try again.');
         return;
       }
 
+      // Show loading alert
+      Alert.alert('Preparing Certificate', 'Capturing your achievement...');
+
+      // Capture the certificate as PNG (without embedded link)
       const uri = await captureRef(certificateRef, {
         format: 'png',
         quality: 1,
       });
 
-      // Create a temporary file path for the captured image
+      // Create a permanent file path in the cache directory
       const fileUri = `${FileSystem.cacheDirectory}wobbly_runner_certificate_${Date.now()}.png`;
       
       // Move the captured image to the cache directory
@@ -147,22 +141,34 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
         to: fileUri,
       });
 
-      // Share the certificate with a message including the app download link
+      // Fixed link that will appear as caption with the image
       const downloadLink = 'https://example.com';
-      const message = `🚀 MY AURA IS PEAK! I just became the ${getPrestigeSalutation(selectedAward.rarity)}! 🤪\n\nDownload the app: ${downloadLink}`;
-
-      await Sharing.shareAsync(fileUri, {
-        mimeType: 'image/png',
-        dialogTitle: 'Share Your Achievement',
-        UTI: 'public.png',
-      });
-
-      // Clean up the temporary file after sharing
-      // Note: We don't delete immediately as the sharing might still be in progress
-      // The OS will clean up the cache directory eventually
       
-    } catch (error) {
+      // Message that will appear as caption below the image
+      const caption = `🚀 MY AURA IS PEAK! I just became the ${getPrestigeSalutation(selectedAward.rarity)}! 🤪\n\n${downloadLink}`;
+
+      // Share options with image + automatic caption
+      const shareOptions = {
+        title: 'Share Your Achievement',
+        message: caption, // ✅ This appears as caption/text with the image
+        url: Platform.OS === 'ios' ? fileUri : `file://${fileUri}`, // The certificate image
+        type: 'image/png',
+        subject: 'Check out my Wobbly Runner achievement!', // For email
+        failOnCancel: false, // Don't throw error if user cancels
+      };
+
+      // Open the share dialog - caption will automatically appear with image
+      await Share.open(shareOptions);
+      
+    } catch (error: any) {
       console.error('Error sharing certificate:', error);
+      
+      // Handle user cancellation gracefully (not an error)
+      if (error && error.message && error.message.includes('User did not share')) {
+        console.log('User cancelled sharing');
+        return;
+      }
+      
       Alert.alert('Share Failed', 'Unable to share the certificate. Please try again.');
     }
   };
@@ -828,6 +834,31 @@ const styles = StyleSheet.create({
   actionsContainer: {
     width: '100%',
     marginBottom: 16,
+  },
+  downloadLinkContainer: {
+    width: '100%',
+    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.2)',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  downloadLinkLabel: {
+    fontSize: 9,
+    color: '#94A3B8',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 6,
+  },
+  downloadLink: {
+    fontSize: 14,
+    color: '#818CF8',
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
   shareButton: {
     backgroundColor: '#4F46E5',
