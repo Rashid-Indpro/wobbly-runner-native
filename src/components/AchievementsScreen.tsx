@@ -281,11 +281,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
                 <Text style={styles.modalCloseText}>Exit View</Text>
               </TouchableOpacity>
 
-            <ScrollView 
-              style={styles.modalScroll}
-              contentContainerStyle={styles.modalScrollContent}
-              showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.modalContent}>
               <View ref={certificateRef} collapsable={false} style={styles.modalCard}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalHeaderEmoji}>🤪</Text>
@@ -396,9 +392,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
                   Claim your glory • Chaos Dash Legend
                 </Text>
               </View>
-            </ScrollView>
-
-            <Text style={styles.scrollHint}>Scroll to see full record</Text>
+            </View>
           </View>
           </SafeAreaView>
         )}
@@ -616,9 +610,9 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    paddingTop: 80,
-    paddingBottom: 16,
+    justifyContent: 'center',
+    paddingTop: 70,
+    paddingBottom: 20,
     paddingHorizontal: 16,
   },
   modalCloseButton: {
@@ -647,16 +641,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 2,
   },
-  modalScroll: {
+  modalContent: {
     width: '100%',
     maxWidth: 768,
-  },
-  modalScrollContent: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
     alignItems: 'center',
-    flexGrow: 1,
     justifyContent: 'center',
+    flex: 1,
+    paddingHorizontal: 16,
   },
   modalCard: {
     backgroundColor: '#020617',
@@ -668,52 +659,52 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 100,
     elevation: 30,
-    padding: 24,
-    paddingHorizontal: 32,
+    padding: 16,
+    paddingHorizontal: 24,
     alignItems: 'center',
     width: '100%',
     maxWidth: 720,
   },
   modalHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   modalHeaderEmoji: {
-    fontSize: 32,
-    marginBottom: 4,
+    fontSize: 28,
+    marginBottom: 2,
   },
   modalHeaderTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     color: '#FFFFFF',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   modalHeaderSubtitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '900',
     color: '#818CF8',
     textTransform: 'uppercase',
     letterSpacing: 4,
-    marginTop: 2,
+    marginTop: 1,
   },
   modalIconContainer: {
     position: 'relative',
-    height: 100,
-    width: 100,
+    height: 90,
+    width: 90,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   modalIconGlow: {
     position: 'absolute',
-    width: 100,
-    height: 100,
+    width: 90,
+    height: 90,
     backgroundColor: 'rgba(99, 102, 241, 0.2)',
-    borderRadius: 50,
+    borderRadius: 45,
   },
   modalIconText: {
-    fontSize: 70,
+    fontSize: 60,
     textShadowColor: 'rgba(99, 102, 241, 0.4)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 40,
@@ -730,12 +721,12 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   modalTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: -0.5,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
     color: '#FFFFFF',
   },
   modalTitleLocked: {
@@ -743,16 +734,16 @@ const styles = StyleSheet.create({
   },
   modalDetailsContainer: {
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   modalSalutation: {
     color: '#818CF8',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 3,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   nameInputContainer: {
     maxWidth: 384,
@@ -764,10 +755,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderBottomWidth: 2,
     borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 12,
+    paddingVertical: 8,
     textAlign: 'center',
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
   },
   verificationPending: {
@@ -796,18 +787,18 @@ const styles = StyleSheet.create({
   },
   descriptionCard: {
     backgroundColor: 'rgba(79, 70, 229, 0.05)',
-    padding: 20,
-    borderRadius: 20,
+    padding: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(99, 102, 241, 0.1)',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   descriptionText: {
     color: '#E2E8F0',
     fontWeight: '700',
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 12,
+    lineHeight: 18,
     fontStyle: 'italic',
     textAlign: 'center',
   },
@@ -815,17 +806,17 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     gap: 16,
-    paddingTop: 20,
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.05)',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   signatureBlock: {
     flex: 1,
     alignItems: 'center',
   },
   signatureName: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '900',
     color: 'rgba(129, 140, 248, 0.9)',
     fontStyle: 'italic',
