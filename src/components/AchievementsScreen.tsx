@@ -270,15 +270,16 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
         onRequestClose={() => setSelectedAward(null)}
       >
         {selectedAward && (
-          <View style={styles.modalOverlay}>
-            <TouchableOpacity 
-              onPress={() => setSelectedAward(null)}
-              style={styles.modalCloseButton}
-              activeOpacity={0.7}
-            >
-              <Icon name="x" size={28} color="#FFFFFF" />
-              <Text style={styles.modalCloseText}>Exit View</Text>
-            </TouchableOpacity>
+          <SafeAreaView style={styles.modalSafeArea}>
+            <View style={styles.modalOverlay}>
+              <TouchableOpacity 
+                onPress={() => setSelectedAward(null)}
+                style={styles.modalCloseButton}
+                activeOpacity={0.7}
+              >
+                <Icon name="x" size={28} color="#FFFFFF" />
+                <Text style={styles.modalCloseText}>Exit View</Text>
+              </TouchableOpacity>
 
             <ScrollView 
               style={styles.modalScroll}
@@ -399,6 +400,7 @@ const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ achievements, o
 
             <Text style={styles.scrollHint}>Scroll to see full record</Text>
           </View>
+          </SafeAreaView>
         )}
       </Modal>
     </SafeAreaView>
@@ -607,16 +609,21 @@ const styles = StyleSheet.create({
     top: 12,
     right: 12,
   },
-  modalOverlay: {
+  modalSafeArea: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.98)',
+  },
+  modalOverlay: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+    justifyContent: 'flex-start',
+    paddingTop: 80,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
   },
   modalCloseButton: {
     position: 'absolute',
-    top: 24,
+    top: 8,
     right: 24,
     padding: 16,
     backgroundColor: '#4F46E5',
@@ -641,13 +648,15 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   modalScroll: {
-    flex: 1,
     width: '100%',
     maxWidth: 768,
   },
   modalScrollContent: {
-    padding: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   modalCard: {
     backgroundColor: '#020617',
