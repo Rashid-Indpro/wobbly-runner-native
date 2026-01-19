@@ -222,7 +222,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
           </View>
           
           <Text style={styles.footerCopyright}>
-            © 2024 WOBBLY GAMES STUDIO • PRESTIGE EDITION
+            © 2026 ALPINE TECHNOLOGIES • PRESTIGE EDITION
           </Text>
         </View>
       </ScrollView>
