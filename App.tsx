@@ -15,11 +15,13 @@ import AchievementsScreen from './src/components/AchievementsScreen';
 import SplashScreen from './src/components/SplashScreen';
 import AboutUs from './src/components/AboutUs';
 import LegalWebView from './src/components/LegalWebView';
+import AlpineStudioIntro from './src/components/AlpineStudioIntro';
 import { soundManager } from './src/utils/SoundManager';
 
 const App: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>('SPLASH');
+  const [gameState, setGameState] = useState<GameState>('ALPINE_INTRO');
   const [gameId, setGameId] = useState(0);
+  const [hasShownAlpineIntro, setHasShownAlpineIntro] = useState(false);
   const [highScore, setHighScore] = useState<number>(0);
   const [totalCoins, setTotalCoins] = useState<number>(0);
   const [settings, setSettings] = useState<Settings>({
@@ -103,6 +105,22 @@ const App: React.FC = () => {
     loadData();
   }, []);
 
+  // Preload background audio when Alpine intro is showing
+  useEffect(() => {
+    if (gameState === 'ALPINE_INTRO') {
+      soundManager.preloadBackgroundAudio();
+    }
+  }, [gameState]);
+
+  const handleAlpineIntroComplete = () => {
+    console.log('✨ Alpine Technologies intro completed');
+    setHasShownAlpineIntro(true);
+    // Start music immediately before transitioning to splash
+    soundManager.playBackgroundAudio();
+    // Transition to splash on next frame for smooth timing
+    setTimeout(() => setGameState('SPLASH'), 0);
+  };
+
   const handleSplashComplete = () => {
     console.log('🚀 App launched - Splash screen completed');
     if (!settings.hasSeenTutorial) {
@@ -112,7 +130,6 @@ const App: React.FC = () => {
       console.log('🏠 Returning user - Going to main menu');
       setGameState('MAIN_MENU');
     }
-    soundManager.playBackgroundAudio();
     updateAchievements({ score: 0, coins: 0, powerUpsUsed: 0, distanceTraveled: 0 }, true);
   };
 
@@ -177,6 +194,10 @@ const App: React.FC = () => {
     setSettings(newSettings);
     soundManager.setEnabled(newSettings.soundEnabled);
     soundManager.setBackgroundAudioEnabled(newSettings.musicEnabled);
+    // Stop music if disabled, but don't auto-start if enabled
+    if (!newSettings.musicEnabled) {
+      soundManager.stopBackgroundAudio();
+    }
     setItem('settings', newSettings);
   };
 
@@ -269,6 +290,7 @@ const App: React.FC = () => {
     <SafeAreaProvider>
       <View style={styles.container}>
         <StatusBar style="light" translucent={false} />
+        {gameState === 'ALPINE_INTRO' && <AlpineStudioIntro onComplete={handleAlpineIntroComplete} />}
         {gameState === 'SPLASH' && <SplashScreen onComplete={handleSplashComplete} />}
         {gameState === 'MAIN_MENU' && (
         <MainMenu 

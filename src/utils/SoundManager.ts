@@ -62,13 +62,9 @@ class SoundManager {
     this.enabled = enabled;
   }
 
-  async setBackgroundAudioEnabled(enabled: boolean) {
+  setBackgroundAudioEnabled(enabled: boolean) {
     this.backgroundAudioEnabled = enabled;
-    if (!enabled) {
-      await this.stopBackgroundAudio();
-    } else {
-      await this.playBackgroundAudio();
-    }
+    // Don't auto-play, let the app control when to start
   }
 
   /**
@@ -113,6 +109,26 @@ class SoundManager {
   }
 
   /**
+   * Preload background audio without playing
+   */
+  async preloadBackgroundAudio() {
+    if (this.backgroundAudioSound || !this.backgroundAudioEnabled) return;
+    
+    await this.ensureInitialized();
+    
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/sounds/background.mp3'),
+        { isLooping: true, shouldPlay: false, volume: 0.5 }
+      );
+      this.backgroundAudioSound = sound;
+      console.log('🎵 Background audio preloaded');
+    } catch (error) {
+      console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
+    }
+  }
+
+  /**
    * Play background audio (single looping file)
    */
   async playBackgroundAudio() {
@@ -124,12 +140,19 @@ class SoundManager {
     await this.ensureInitialized();
     
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        require('../assets/sounds/background.mp3'),
-        { isLooping: true, shouldPlay: true, volume: 0.5 }
-      );
-      this.backgroundAudioSound = sound;
-      console.log('🎵 Background audio started');
+      // If already preloaded, just play it
+      if (this.backgroundAudioSound) {
+        await this.backgroundAudioSound.playAsync();
+        console.log('🎵 Background audio started (preloaded)');
+      } else {
+        // Otherwise load and play
+        const { sound } = await Audio.Sound.createAsync(
+          require('../assets/sounds/background.mp3'),
+          { isLooping: true, shouldPlay: true, volume: 0.5 }
+        );
+        this.backgroundAudioSound = sound;
+        console.log('🎵 Background audio started');
+      }
     } catch (error) {
       console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
       this.isBackgroundPlaying = false;
