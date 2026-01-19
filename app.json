@@ -4,7 +4,13 @@
     "slug": "wobbly-runner-native",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090B"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -13,6 +19,10 @@
       "bundleIdentifier": "com.wobblyrunner.app"
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#09090B"
+      },
       "package": "com.wobblyrunner.app"
     },
     "web": {
