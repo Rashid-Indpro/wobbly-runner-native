@@ -33,6 +33,9 @@
       "url": "https://u.expo.dev/wobbly-runner-native"
     },
     "runtimeVersion": "1.0.0",
+    "react-native-google-mobile-ads": {
+      "android_app_id": "ca-app-pub-9218417844776973~6881893458"
+    },
     "plugins": [
       [
         "expo-av",

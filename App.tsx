@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import mobileAds from 'react-native-google-mobile-ads';
 import { GameState, Settings, PowerUp, RunStats, Skin, Achievement, LegalPageType } from './src/types';
 import { SKINS, INITIAL_ACHIEVEMENTS, POWER_UPS, LEGAL_PAGES } from './src/constants';
 import { getItem, setItem } from './src/utils/storage';
@@ -10,7 +11,7 @@ import GameContainer from './src/components/GameContainer';
 import StoreScreen from './src/components/StoreScreen';
 import SettingsScreen from './src/components/SettingsScreen';
 import Tutorial from './src/components/Tutorial';
-import AdSimulator from './src/components/AdSimulator';
+import RewardedAdManager from './src/components/RewardedAdManager';
 import AchievementsScreen from './src/components/AchievementsScreen';
 import SplashScreen from './src/components/SplashScreen';
 import AboutUs from './src/components/AboutUs';
@@ -62,6 +63,16 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
+    // Initialize Google Mobile Ads SDK once at startup
+    mobileAds()
+      .initialize()
+      .then(adapterStatuses => {
+        console.log('✅ Google Mobile Ads SDK initialized successfully');
+      })
+      .catch(error => {
+        console.error('❌ Failed to initialize Google Mobile Ads SDK:', error);
+      });
+
     const loadData = async () => {
       const savedHighScore = await getItem<number>('highScore');
       const savedCoins = await getItem<number>('coins');
@@ -404,7 +415,7 @@ const App: React.FC = () => {
         }} />
       )}
       {gameState === 'AD_WATCHING' && (
-        <AdSimulator onComplete={handleAdComplete} />
+        <RewardedAdManager onComplete={handleAdComplete} />
       )}
       </View>
     </SafeAreaProvider>
