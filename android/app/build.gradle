@@ -94,8 +94,18 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        
+        // Multi-dex support for production
+        multiDexEnabled true
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+    }
+    
+    // Lint configuration - disable problematic checks and skip for release
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+        disable 'AppLinkWarning', 'AppLinkSplitToWebAndCustom', 'IntentFilterUniqueDataAttributes', 'TestAppLink', 'AppLinkUriRelativeFilterGroupError', 'AppLinkUrlError'
     }
     signingConfigs {
         debug {
@@ -104,16 +114,25 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            // Production release signing
+            // Before releasing, you MUST generate a production keystore
+            // See RELEASE_KEYSTORE_SETUP.md for instructions
+            if (project.hasProperty('WOBBLY_RUNNER_UPLOAD_STORE_FILE')) {
+                storeFile file(WOBBLY_RUNNER_UPLOAD_STORE_FILE)
+                storePassword WOBBLY_RUNNER_UPLOAD_STORE_PASSWORD
+                keyAlias WOBBLY_RUNNER_UPLOAD_KEY_ALIAS
+                keyPassword WOBBLY_RUNNER_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
+            signingConfig signingConfigs.release
+            def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'true'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"

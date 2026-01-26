@@ -7,11 +7,9 @@ interface RewardedAdManagerProps {
   onError?: () => void;
 }
 
-// Use test ads during development, production ID when account is activated
-// To use production: Set __DEV__ to false or change to production ID
-const AD_UNIT_ID = __DEV__ 
-  ? TestIds.REWARDED 
-  : 'ca-app-pub-9218417844776973/9111323742';
+// Production AdMob ID - always use production ID for release builds
+// If you need to test ads during development, temporarily replace with TestIds.REWARDED
+const AD_UNIT_ID = 'ca-app-pub-9218417844776973/9111323742';
 
 const RewardedAdManager: React.FC<RewardedAdManagerProps> = ({ onComplete, onError }) => {
   const [isLoading, setIsLoading] = useState(true);

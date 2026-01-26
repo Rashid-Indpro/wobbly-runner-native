@@ -11,6 +11,10 @@ npm-debug.*
 web-build/
 dist/
 
+# 🔐 CRITICAL: Never commit keystore files
+*.keystore
+!debug.keystore
+
 # macOS
 .DS_Store
 
