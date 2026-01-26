@@ -146,16 +146,10 @@ const App: React.FC = () => {
 
   const onStartGameRequested = () => {
     console.log('🎯 User requested game start');
-    if (Math.random() < 0.2) { 
-      console.log('📺 Showing ad before game start');
-      soundManager.stopBackgroundAudio();
-      setAdPurpose('START');
-      setGameState('AD_WATCHING');
-    } else {
-      console.log('🎮 Starting game directly - Game ID:', gameId + 1);
-      setGameId(prev => prev + 1);
-      setGameState('PLAYING');
-    }
+    // Removed ad trigger on Dash button - Start game directly
+    console.log('🎮 Starting game directly - Game ID:', gameId + 1);
+    setGameId(prev => prev + 1);
+    setGameState('PLAYING');
   };
 
   const updateAchievements = (stats: RunStats, isFirstLoad: boolean = false) => {
