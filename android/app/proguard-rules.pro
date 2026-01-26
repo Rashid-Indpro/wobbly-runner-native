@@ -14,6 +14,11 @@
 # Google Mobile Ads - Critical for AdMob functionality
 -keep class com.google.android.gms.ads.** { *; }
 -keep class com.google.ads.** { *; }
+-keep class com.google.android.gms.ads.MobileAdsInitProvider { *; }
+-keep class com.google.android.gms.ads.identifier.** { *; }
+-keepclassmembers class com.google.android.gms.ads.** {
+    public *;
+}
 -dontwarn com.google.android.gms.ads.**
 
 # React Native
