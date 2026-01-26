@@ -34,10 +34,19 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
       return;
     }
 
-    const interval = setInterval(() => {
+    // Immediately calculate and set initial progress
+    const calculateProgress = () => {
       const total = activePower.currentExpiry - activePower.currentStart;
       const remaining = activePower.currentExpiry - Date.now();
-      const pct = Math.max(0, (remaining / total) * 100);
+      return Math.max(0, Math.min(100, (remaining / total) * 100));
+    };
+
+    // Set initial progress immediately
+    setProgress(calculateProgress());
+
+    // Update progress every 50ms for smooth animation
+    const interval = setInterval(() => {
+      const pct = calculateProgress();
       setProgress(pct);
       if (pct <= 0) clearInterval(interval);
     }, 50);
@@ -224,16 +233,22 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   progressBarContainer: {
-    width: 128,
-    height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 3,
+    width: 200,
+    height: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 4,
     overflow: 'hidden',
-    marginTop: 4,
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#10B981',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
   },
   equippedPowersRow: {
     flexDirection: 'row',
