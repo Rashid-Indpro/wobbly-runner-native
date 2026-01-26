@@ -657,6 +657,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 4,
+    flexWrap: 'wrap',
   },
   powerName: {
     color: '#FFFFFF',
@@ -664,17 +665,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    flexShrink: 1,
   },
   powerDurationBadge: {
     backgroundColor: 'rgba(129, 140, 248, 0.2)',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 8,
+    flexShrink: 0,
   },
   powerDurationText: {
     color: '#C7D2FE',
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '900',
+    letterSpacing: 0.3,
   },
   powerDesc: {
     color: '#71717A',
