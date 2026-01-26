@@ -123,6 +123,9 @@ android {
                 storePassword WOBBLY_RUNNER_UPLOAD_STORE_PASSWORD
                 keyAlias WOBBLY_RUNNER_UPLOAD_KEY_ALIAS
                 keyPassword WOBBLY_RUNNER_UPLOAD_KEY_PASSWORD
+                // Enable all signing schemes for maximum compatibility
+                v1SigningEnabled true
+                v2SigningEnabled true
             }
         }
     }
