@@ -24,3 +24,8 @@ dist/
 *~
 .vscode/
 .idea/
+
+# Crash logs and debug files
+crash-log.txt
+crash-summary.txt
+get-crash-logs.bat
