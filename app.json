@@ -2,7 +2,7 @@
   "expo": {
     "name": "Wobbly Runner",
     "slug": "wobbly-runner-native",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "dark",
@@ -32,7 +32,7 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/wobbly-runner-native"
     },
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": "1.0.1",
     "react-native-google-mobile-ads": {
       "android_app_id": "ca-app-pub-9218417844276973~5801993490"
     },
