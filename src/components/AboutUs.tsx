@@ -222,7 +222,7 @@ const AboutUs: React.FC<AboutUsProps> = ({ onBack, onOpenLegalPage }) => {
           </View>
           
           <Text style={styles.footerCopyright}>
-            © 2026 ALPINE TECHNOLOGIES • PRESTIGE EDITION
+            © 2026 Interaminds • PRESTIGE EDITION
           </Text>
         </View>
       </ScrollView>

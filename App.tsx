@@ -124,7 +124,7 @@ const App: React.FC = () => {
   }, [gameState]);
 
   const handleAlpineIntroComplete = () => {
-    console.log('✨ Alpine Technologies intro completed');
+    console.log('✨ Interaminds intro completed');
     setHasShownAlpineIntro(true);
     // Start music immediately before transitioning to splash
     soundManager.playBackgroundAudio();

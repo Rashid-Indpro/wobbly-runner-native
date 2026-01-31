@@ -1,12 +1,12 @@
 
 import { PowerUpType, PowerUp, Skin, Challenge, Achievement, Rarity } from '../types';
 
-// Legal Pages URLs - Public GitHub Pages URLs
+// Legal Pages URLs - InteraMinds Website
 export const LEGAL_PAGES = {
-  PRIVACY: 'https://rashid-indpro.github.io/wobbly-runner-native/privacy-policy.html',
-  TERMS: 'https://rashid-indpro.github.io/wobbly-runner-native/terms-conditions.html',
-  ABOUT: 'https://rashid-indpro.github.io/wobbly-runner-native/about-us.html',
-  CONTACT: 'https://rashid-indpro.github.io/wobbly-runner-native/contact-us.html'
+  PRIVACY: 'https://interaminds.com/#privacy',
+  TERMS: 'https://interaminds.com/#terms',
+  ABOUT: 'https://interaminds.com/#about',
+  CONTACT: 'https://interaminds.com/#contact'
 };
 
 export const POWER_UPS: Record<PowerUpType, PowerUp> = {
