@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 
 interface AlpineStudioIntroProps {
@@ -9,21 +9,56 @@ interface AlpineStudioIntroProps {
 const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => {
   const videoRef = useRef<Video>(null);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Play video when component mounts
-    if (videoRef.current) {
-      videoRef.current.playAsync();
-    }
+    console.log('🎬 InteraMinds intro: Loading video...');
+    
+    // Fallback timer in case video fails to load
+    const fallbackTimer = setTimeout(() => {
+      console.log('⏱️ Video fallback timeout reached, completing intro');
+      if (!hasCompleted) {
+        setHasCompleted(true);
+        onComplete();
+      }
+    }, 6000); // 6 second fallback
+
+    return () => clearTimeout(fallbackTimer);
   }, []);
 
   const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded && status.didJustFinish && !hasCompleted) {
+    if (!status.isLoaded) {
+      if (status.error) {
+        console.error('❌ Video error:', status.error);
+        setError(`Video error: ${status.error}`);
+        // Complete intro on error
+        if (!hasCompleted) {
+          setHasCompleted(true);
+          setTimeout(() => onComplete(), 500);
+        }
+      }
+      return;
+    }
+
+    // Video is loaded and playing
+    if (status.isPlaying) {
+      console.log('▶️ Video is playing');
+    }
+
+    // Video finished playing
+    if (status.didJustFinish && !hasCompleted) {
+      console.log('✅ Video finished, completing intro');
       setHasCompleted(true);
-      // Small delay before transitioning to next screen
-      setTimeout(() => {
-        onComplete();
-      }, 200);
+      setTimeout(() => onComplete(), 300);
+    }
+  };
+
+  const handleError = (error: string) => {
+    console.error('❌ Video load error:', error);
+    setError(error);
+    if (!hasCompleted) {
+      setHasCompleted(true);
+      setTimeout(() => onComplete(), 500);
     }
   };
 
@@ -38,7 +73,14 @@ const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => 
         isLooping={false}
         isMuted={false}
         onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        onError={handleError}
+        useNativeControls={false}
       />
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Loading...</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -53,6 +95,15 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     height: '100%',
+  },
+  errorContainer: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: '#666',
+    fontSize: 14,
   },
 });
 
