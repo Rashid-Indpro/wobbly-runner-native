@@ -199,10 +199,8 @@ const App: React.FC = () => {
     setSettings(newSettings);
     soundManager.setEnabled(newSettings.soundEnabled);
     soundManager.setBackgroundAudioEnabled(newSettings.musicEnabled);
-    // Stop music if disabled, but don't auto-start if enabled
-    if (!newSettings.musicEnabled) {
-      soundManager.stopBackgroundAudio();
-    }
+    // Music will be stopped immediately if disabled via setBackgroundAudioEnabled
+    // If enabled, let GameContainer's useEffect handle starting it
     setItem('settings', newSettings);
   };
 
@@ -265,7 +263,10 @@ const App: React.FC = () => {
   };
 
   const handleAdComplete = () => {
-    soundManager.playBackgroundAudio();
+    // Only restart music if it's enabled in settings
+    if (settings.musicEnabled) {
+      soundManager.playBackgroundAudio();
+    }
     if (adPurpose === 'STORE' && adPurposeItem) {
       const newOwned = { ...ownedPowerUses };
       newOwned[adPurposeItem.id] = (newOwned[adPurposeItem.id] || 0) + 3;

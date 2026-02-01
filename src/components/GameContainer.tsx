@@ -185,19 +185,19 @@ const GameContainer: React.FC<GameContainerProps> = ({
     wasAdShowingRef.current = isExternalAdShowing;
   }, [isExternalAdShowing]);
 
-  // Music management
+  // Music management - ONLY controlled by settings and ads
   useEffect(() => {
-    if (isExternalAdShowing || !settings.musicEnabled) {
-      // Stop music if: ad showing OR music disabled
+    if (!settings.musicEnabled) {
+      // Music disabled in settings - stop in ALL circumstances
       soundManager.stopBackgroundAudio();
-    } else if (isPaused || showGameOver) {
-      // Stop music if: game paused OR game over
+    } else if (isExternalAdShowing) {
+      // Stop music during ads (even if enabled)
       soundManager.stopBackgroundAudio();
     } else {
-      // Play music only if: game active AND music enabled
+      // Play music if enabled (regardless of pause/game over state)
       soundManager.playBackgroundAudio();
     }
-  }, [isExternalAdShowing, isPaused, showGameOver, settings.musicEnabled]);
+  }, [isExternalAdShowing, settings.musicEnabled]);
   
   // Cleanup only on unmount
   useEffect(() => {

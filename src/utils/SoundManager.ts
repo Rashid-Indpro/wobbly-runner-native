@@ -64,7 +64,11 @@ class SoundManager {
 
   setBackgroundAudioEnabled(enabled: boolean) {
     this.backgroundAudioEnabled = enabled;
-    // Don't auto-play, let the app control when to start
+    
+    // Immediately stop music if disabled
+    if (!enabled && this.isBackgroundPlaying) {
+      this.stopBackgroundAudio();
+    }
   }
 
   /**
