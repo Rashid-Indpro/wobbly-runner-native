@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from './LinearGradient';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface AlpineStudioIntroProps {
   onComplete: () => void;
@@ -132,7 +131,7 @@ const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => 
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        {/* Logo with gradient */}
+        {/* Logo with gradient text effect */}
         <Animated.View
           style={{
             opacity: logoOpacity,
@@ -142,23 +141,22 @@ const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => 
             ],
           }}
         >
-          <LinearGradient
-            colors={['#3b82f6', '#8b5cf6', '#3b82f6']}
-            start={{ x: 0, y: 0.5 }}
-            end={{ x: 1, y: 0.5 }}
-            style={styles.gradientBackground}
+          <MaskedView
+            maskElement={
+              <Text style={styles.logo}>InteraMinds</Text>
+            }
           >
-            <Animated.Text
-              style={[
-                styles.logo,
-                {
-                  opacity: shineBrightness,
-                },
-              ]}
+            <LinearGradient
+              colors={['#3b82f6', '#8b5cf6', '#3b82f6']}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.gradientContainer}
             >
-              InteraMinds
-            </Animated.Text>
-          </LinearGradient>
+              <Animated.View style={{ opacity: shineBrightness }}>
+                <Text style={[styles.logo, styles.transparentText]}>InteraMinds</Text>
+              </Animated.View>
+            </LinearGradient>
+          </MaskedView>
         </Animated.View>
 
         {/* "presents" text */}
@@ -201,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-  gradientBackground: {
+  gradientContainer: {
     borderRadius: 0,
   },
   logo: {
@@ -209,8 +207,11 @@ const styles = StyleSheet.create({
     fontSize: 56, // 3.5rem
     fontWeight: '700',
     letterSpacing: -0.5,
-    color: 'white',
+    color: 'black',
     marginBottom: 10,
+  },
+  transparentText: {
+    opacity: 0,
   },
   presents: {
     fontFamily: 'System',
