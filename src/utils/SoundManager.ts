@@ -123,7 +123,7 @@ class SoundManager {
     try {
       const { sound } = await Audio.Sound.createAsync(
         require('../assets/sounds/background.mp3'),
-        { isLooping: true, shouldPlay: false, volume: 0.5 }
+        { isLooping: true, shouldPlay: false, volume: 0.25 }
       );
       this.backgroundAudioSound = sound;
       console.log('🎵 Background audio preloaded');
@@ -152,7 +152,7 @@ class SoundManager {
         // Otherwise load and play
         const { sound } = await Audio.Sound.createAsync(
           require('../assets/sounds/background.mp3'),
-          { isLooping: true, shouldPlay: true, volume: 0.5 }
+          { isLooping: true, shouldPlay: true, volume: 0.25 }
         );
         this.backgroundAudioSound = sound;
         console.log('🎵 Background audio started');

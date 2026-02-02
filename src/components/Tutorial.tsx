@@ -32,8 +32,8 @@ const Tutorial: React.FC<TutorialProps> = ({ onComplete }) => {
     },
     {
       title: "WATCH OUT!",
-      desc: "Avoid Banana Peels, Fires, Crabs, and Aliens. They will make you SPLAT!",
-      icon: "🔥🦀👽",
+      desc: "Avoid Skulls, Traps, Scorpions, and Spiders. They will make you SPLAT!",
+      icon: "☠️🪤🦂",
       bg: "#EF4444"
     },
     {

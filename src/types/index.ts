@@ -127,6 +127,7 @@ export interface Settings {
   musicEnabled: boolean;
   vibrationEnabled: boolean;
   hasSeenTutorial: boolean;
+  hasSeenGameplayTip: boolean;
   hasConsented: boolean;
   selectedBGM: BGMTrack;
   equippedPowerIds: string[];

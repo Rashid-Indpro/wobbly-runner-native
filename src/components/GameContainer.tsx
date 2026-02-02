@@ -4,6 +4,7 @@ import { Settings, PowerUp, PowerUpType, Obstacle, Collectible, Skin, ObstacleBe
 import { POWER_UPS, INITIAL_SPEED, SPAWN_RATE, COIN_VALUE } from '../constants';
 import UIOverlay from './UIOverlay';
 import GameOver from './GameOver';
+import GameplayTip from './GameplayTip';
 import { soundManager } from '../utils/SoundManager';
 
 // Polyfill for React Native compatibility
@@ -35,6 +36,7 @@ interface GameContainerProps {
   onUsePower: (id: string) => void;
   onRequestRevive: () => void;
   onExit: () => void;
+  onMarkGameplayTipSeen: () => void;
   isExternalAdShowing?: boolean;
 }
 
@@ -49,12 +51,14 @@ const GameContainer: React.FC<GameContainerProps> = ({
   onUsePower, 
   onRequestRevive, 
   onExit, 
+  onMarkGameplayTipSeen,
   isExternalAdShowing = false
 }) => {
   const [score, setScore] = useState(0);
   const [coinsCollected, setCoinsCollected] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(!settings.hasSeenGameplayTip);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [showGameplayTip, setShowGameplayTip] = useState(!settings.hasSeenGameplayTip);
   const [activePower, setActivePower] = useState<{type: PowerUpType, expiry: number, start: number} | null>(null);
   const [reviveCount, setReviveCount] = useState(0);
   const [, forceUpdate] = useState(0);
@@ -83,6 +87,14 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const wasAdShowingRef = useRef(false);
 
   const getLaneX = (lane: number, canvasWidth: number) => (canvasWidth / 3) * lane + (canvasWidth / 3) / 2;
+
+  // Handle gameplay tip continue
+  const handleGameplayTipContinue = () => {
+    setShowGameplayTip(false);
+    setIsPaused(false);
+    onMarkGameplayTipSeen();
+    console.log('🎮 Gameplay tip dismissed - Starting game!');
+  };
 
   // Safe exit handler - stops game loop, cleans up audio, navigates back
   const handleBackPress = () => {
@@ -430,34 +442,101 @@ const GameContainer: React.FC<GameContainerProps> = ({
     }
   };
 
-  // Touch handling
+  // Touch handling - Tap and Swipe
+  const gestureState = useRef({
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    isSwiping: false,
+  });
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Enable tracking if horizontal movement is significant
+        return Math.abs(gestureState.dx) > 10 || Math.abs(gestureState.dy) > 10;
+      },
       onPanResponderGrant: (evt) => {
         if (gameStateRef.current.gameOver || isExternalAdShowing) return;
-        const x = evt.nativeEvent.locationX;
-        const lane = Math.floor(x / (gameStateRef.current.canvasWidth / 3));
-        if (lane !== gameStateRef.current.player.lane) {
-          gameStateRef.current.player.lane = lane;
-          gameStateRef.current.player.targetX = getLaneX(lane, gameStateRef.current.canvasWidth);
-          soundManager.playMove();
-          if (settings.vibrationEnabled) {
-            Vibration.vibrate(5); // Very light tap for lane switch
+        // Store initial touch position
+        gestureState.current = {
+          startX: evt.nativeEvent.pageX,
+          startY: evt.nativeEvent.pageY,
+          startTime: Date.now(),
+          isSwiping: false,
+        };
+      },
+      onPanResponderMove: (evt, gesture) => {
+        if (gameStateRef.current.gameOver || isExternalAdShowing) return;
+        // Detect if user is swiping (not just tapping)
+        const horizontalDistance = Math.abs(gesture.dx);
+        const verticalDistance = Math.abs(gesture.dy);
+        
+        // Consider it a swipe if horizontal movement > 30px and more horizontal than vertical
+        if (horizontalDistance > 30 && horizontalDistance > verticalDistance * 1.5) {
+          gestureState.current.isSwiping = true;
+        }
+      },
+      onPanResponderRelease: (evt, gesture) => {
+        if (gameStateRef.current.gameOver || isExternalAdShowing) return;
+        
+        const timeDiff = Date.now() - gestureState.current.startTime;
+        const horizontalDistance = gesture.dx;
+        const verticalDistance = Math.abs(gesture.dy);
+        
+        // SWIPE DETECTION: Horizontal swipe with velocity
+        if (gestureState.current.isSwiping && Math.abs(horizontalDistance) > 50 && timeDiff < 300) {
+          // Swipe left or right
+          const currentLane = gameStateRef.current.player.lane;
+          let newLane = currentLane;
+          
+          if (horizontalDistance > 0) {
+            // Swipe right → move right
+            newLane = Math.min(2, currentLane + 1);
+          } else {
+            // Swipe left → move left
+            newLane = Math.max(0, currentLane - 1);
+          }
+          
+          if (newLane !== currentLane) {
+            gameStateRef.current.player.lane = newLane;
+            gameStateRef.current.player.targetX = getLaneX(newLane, gameStateRef.current.canvasWidth);
+            soundManager.playMove();
+            if (settings.vibrationEnabled) {
+              Vibration.vibrate(5); // Very light tap for lane switch
+            }
           }
         }
+        // TAP DETECTION: Quick tap with minimal movement
+        else if (!gestureState.current.isSwiping && Math.abs(horizontalDistance) < 20 && verticalDistance < 20 && timeDiff < 200) {
+          // Original tap behavior - tap on left/middle/right to go to that lane
+          const x = evt.nativeEvent.locationX;
+          const lane = Math.floor(x / (gameStateRef.current.canvasWidth / 3));
+          if (lane !== gameStateRef.current.player.lane) {
+            gameStateRef.current.player.lane = lane;
+            gameStateRef.current.player.targetX = getLaneX(lane, gameStateRef.current.canvasWidth);
+            soundManager.playMove();
+            if (settings.vibrationEnabled) {
+              Vibration.vibrate(5); // Very light tap for lane switch
+            }
+          }
+        }
+        
+        // Reset gesture state
+        gestureState.current.isSwiping = false;
       },
     })
   ).current;
 
   const getObstacleIcon = (type: Obstacle['type']): string => {
     const icons: Record<Obstacle['type'], string> = {
-      BANANA: '🍌', RAKE: '🪵', PIE: '🥧', CHICKEN: '🐔', CACTUS: '🌵',
-      GHOST: '👻', FIRE: '🔥', CRAB: '🦀', ALIEN: '👽', ANVIL: '🏗️',
+      BANANA: '☠️', RAKE: '🪵', PIE: '🪤', CHICKEN: '🦂', CACTUS: '🌵',
+      GHOST: '💀', FIRE: '🔥', CRAB: '🕷️', ALIEN: '👽', ANVIL: '🏗️',
       TORNADO: '🌪️', UFO: '🛸', CAR: '🚗', SAW: '⚙️', BOMB: '💣',
       TNT: '🧨', SPIKES: '⛓️', LAVA: '🌋', LASER: '⚡'
     };
-    return icons[type] || '🍌';
+    return icons[type] || '☠️';
   };
 
   const state = gameStateRef.current;
@@ -600,6 +679,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
           onFinish={(action) => onGameOver(score, gameStateRef.current.coins, gameStateRef.current.powerUpsUsed, action)} 
           canRevive={reviveCount < 1} 
         />
+      )}
+
+      {showGameplayTip && (
+        <GameplayTip onContinue={handleGameplayTipContinue} />
       )}
     </View>
   );

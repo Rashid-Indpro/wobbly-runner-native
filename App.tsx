@@ -30,6 +30,7 @@ const App: React.FC = () => {
     musicEnabled: true,
     vibrationEnabled: true,
     hasSeenTutorial: false,
+    hasSeenGameplayTip: false,
     hasConsented: false,
     selectedBGM: 'SHUFFLE',
     equippedPowerIds: []
@@ -335,6 +336,12 @@ const App: React.FC = () => {
           onUsePower={handleUseEquippedPower}
           onRequestRevive={() => requestAd('REVIVE')}
           onExit={() => setGameState('MAIN_MENU')}
+          onMarkGameplayTipSeen={() => {
+            const newSettings = { ...settings, hasSeenGameplayTip: true };
+            setSettings(newSettings);
+            setItem('settings', newSettings);
+            console.log('✅ Gameplay tip marked as seen');
+          }}
           isExternalAdShowing={gameState === 'AD_WATCHING' && adPurpose === 'REVIVE'}
         />
       )}
