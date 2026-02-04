@@ -114,21 +114,32 @@ class SoundManager {
 
   /**
    * Preload background audio without playing
+   * Uses Android raw resource to avoid expo-asset downloadAsync issues in production
    */
   async preloadBackgroundAudio() {
+    console.log('🎵 [BGM] preloadBackgroundAudio called');
+    console.log('🎵 [BGM] backgroundAudioSound exists?', !!this.backgroundAudioSound);
+    console.log('🎵 [BGM] backgroundAudioEnabled?', this.backgroundAudioEnabled);
+    
     if (this.backgroundAudioSound || !this.backgroundAudioEnabled) return;
     
     await this.ensureInitialized();
     
     try {
+      console.log('🎵 [BGM] Loading background audio from Android raw resource...');
+      // Use Android raw resource URI to bypass expo-asset downloadAsync
+      // File must be at: android/app/src/main/res/raw/background.mp3
       const { sound } = await Audio.Sound.createAsync(
-        require('../assets/sounds/background.mp3'),
+        { uri: 'android.resource://com.wobblyrunner.app/raw/background' },
         { isLooping: true, shouldPlay: false, volume: 0.25 }
       );
       this.backgroundAudioSound = sound;
-      console.log('🎵 Background audio preloaded');
+      console.log('✅ [BGM] Background audio preloaded successfully!');
     } catch (error) {
-      console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
+      console.error('❌ [BGM] Background audio preload FAILED');
+      console.error('❌ [BGM] Error:', error);
+      console.error('❌ [BGM] Error message:', error?.message);
+      console.error('❌ [BGM] Error name:', error?.name);
     }
   }
 
@@ -136,7 +147,15 @@ class SoundManager {
    * Play background audio (single looping file)
    */
   async playBackgroundAudio() {
-    if (!this.backgroundAudioEnabled || this.isBackgroundPlaying) return;
+    if (!this.backgroundAudioEnabled) {
+      console.log('🔇 Background audio disabled in settings');
+      return;
+    }
+    
+    if (this.isBackgroundPlaying) {
+      console.log('🎵 [BGM-PLAY] Background audio already playing');
+      return;
+    }
     
     // Set flag IMMEDIATELY to prevent race conditions with concurrent calls
     this.isBackgroundPlaying = true;
@@ -146,19 +165,27 @@ class SoundManager {
     try {
       // If already preloaded, just play it
       if (this.backgroundAudioSound) {
+        console.log('🎵 [BGM-PLAY] Playing preloaded background audio...');
+        const status = await this.backgroundAudioSound.getStatusAsync();
+        console.log('🎵 [BGM-PLAY] Current status:', JSON.stringify(status));
         await this.backgroundAudioSound.playAsync();
-        console.log('🎵 Background audio started (preloaded)');
+        console.log('✅ [BGM-PLAY] Background audio started (preloaded)');
       } else {
-        // Otherwise load and play
+        // Otherwise load and play - use Android raw resource
+        console.log('🎵 [BGM-PLAY] Loading and playing background audio from raw resource...');
         const { sound } = await Audio.Sound.createAsync(
-          require('../assets/sounds/background.mp3'),
+          { uri: 'android.resource://com.wobblyrunner.app/raw/background' },
           { isLooping: true, shouldPlay: true, volume: 0.25 }
         );
         this.backgroundAudioSound = sound;
-        console.log('🎵 Background audio started');
+        console.log('✅ [BGM-PLAY] Background audio started (loaded fresh)');
       }
     } catch (error) {
-      console.log('⏳ Background audio file not found - add background.mp3 to assets/sounds/');
+      console.error('❌ [BGM-PLAY] Background audio play FAILED');
+      console.error('❌ [BGM-PLAY] Error:', error);
+      console.error('❌ [BGM-PLAY] Error message:', error?.message);
+      console.error('❌ [BGM-PLAY] Error name:', error?.name);
+      console.error('❌ [BGM-PLAY] Error stack:', error?.stack);
       this.isBackgroundPlaying = false;
       this.backgroundAudioSound = null;
     }
