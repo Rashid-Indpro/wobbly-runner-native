@@ -125,6 +125,7 @@ export interface RunStats {
 export interface Settings {
   soundEnabled: boolean;
   musicEnabled: boolean;
+  menuBgmEnabled: boolean;
   vibrationEnabled: boolean;
   hasSeenTutorial: boolean;
   hasSeenGameplayTip: boolean;

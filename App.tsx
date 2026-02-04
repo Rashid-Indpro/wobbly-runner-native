@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<Settings>({
     soundEnabled: true,
     musicEnabled: true,
+    menuBgmEnabled: true,
     vibrationEnabled: true,
     hasSeenTutorial: false,
     hasSeenGameplayTip: false,
@@ -111,24 +112,25 @@ const App: React.FC = () => {
         setSettings(prev => ({ ...prev, ...savedSettings }));
         soundManager.setEnabled(savedSettings.soundEnabled);
         soundManager.setBackgroundAudioEnabled(savedSettings.musicEnabled);
+        soundManager.setMenuBgmEnabled(savedSettings.menuBgmEnabled ?? true);
       }
     };
 
     loadData();
   }, []);
 
-  // Preload background audio when Alpine intro is showing
+  // Preload menu BGM during Alpine intro (not background music)
   useEffect(() => {
     if (gameState === 'ALPINE_INTRO') {
-      soundManager.preloadBackgroundAudio();
+      soundManager.preloadMenuBgm();
     }
   }, [gameState]);
 
   const handleAlpineIntroComplete = () => {
     console.log('✨ Interaminds intro completed');
     setHasShownAlpineIntro(true);
-    // Start music immediately before transitioning to splash
-    soundManager.playBackgroundAudio();
+    // Start menu BGM immediately after intro
+    soundManager.playMenuBgm();
     // Transition to splash on next frame for smooth timing
     setTimeout(() => setGameState('SPLASH'), 0);
   };
@@ -200,8 +202,9 @@ const App: React.FC = () => {
     setSettings(newSettings);
     soundManager.setEnabled(newSettings.soundEnabled);
     soundManager.setBackgroundAudioEnabled(newSettings.musicEnabled);
-    // Music will be stopped immediately if disabled via setBackgroundAudioEnabled
-    // If enabled, let GameContainer's useEffect handle starting it
+    soundManager.setMenuBgmEnabled(newSettings.menuBgmEnabled);
+    // Music will be stopped immediately if disabled via setBackgroundAudioEnabled/setMenuBgmEnabled
+    // If enabled, let appropriate screens handle starting it
     setItem('settings', newSettings);
   };
 

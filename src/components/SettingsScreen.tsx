@@ -122,10 +122,16 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onSave, onBac
             onToggle={() => toggle('soundEnabled')} 
           />
           <SettingToggle 
-            label="Music Playback" 
+            label="Gameplay Music" 
             enabled={settings.musicEnabled} 
             icon="music"
             onToggle={() => toggle('musicEnabled')} 
+          />
+          <SettingToggle 
+            label="Menu Music" 
+            enabled={settings.menuBgmEnabled} 
+            icon="disc"
+            onToggle={() => toggle('menuBgmEnabled')} 
           />
           <SettingToggle 
             label="Vibration & Haptics" 

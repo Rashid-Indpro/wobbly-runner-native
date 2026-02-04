@@ -197,24 +197,28 @@ const GameContainer: React.FC<GameContainerProps> = ({
     wasAdShowingRef.current = isExternalAdShowing;
   }, [isExternalAdShowing]);
 
-  // Music management - ONLY controlled by settings and ads
+  // Music management - Stop menu BGM, play gameplay BGM
   useEffect(() => {
+    // Stop menu BGM when entering gameplay
+    soundManager.stopMenuBgm();
+    
     if (!settings.musicEnabled) {
-      // Music disabled in settings - stop in ALL circumstances
+      // Gameplay music disabled in settings - stop in ALL circumstances
       soundManager.stopBackgroundAudio();
     } else if (isExternalAdShowing) {
       // Stop music during ads (even if enabled)
       soundManager.stopBackgroundAudio();
     } else {
-      // Play music if enabled (regardless of pause/game over state)
+      // Play gameplay music if enabled (regardless of pause/game over state)
       soundManager.playBackgroundAudio();
     }
   }, [isExternalAdShowing, settings.musicEnabled]);
   
-  // Cleanup only on unmount
+  // Cleanup on unmount - stop gameplay music and resume menu BGM
   useEffect(() => {
     return () => {
       soundManager.stopBackgroundAudio();
+      soundManager.resumeMenuBgm();
     };
   }, []);
 

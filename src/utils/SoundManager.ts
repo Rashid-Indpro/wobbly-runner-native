@@ -9,8 +9,11 @@ import { BGMTrack } from '../types';
 class SoundManager {
   private enabled: boolean = true;
   private backgroundAudioEnabled: boolean = true;
+  private menuBgmEnabled: boolean = true;
   private backgroundAudioSound: Audio.Sound | null = null;
+  private menuBgmSound: Audio.Sound | null = null;
   private isBackgroundPlaying: boolean = false;
+  private isMenuBgmPlaying: boolean = false;
   
   // SDK 54 compatible audio mode
   private audioMode = {
@@ -69,6 +72,26 @@ class SoundManager {
     if (!enabled && this.isBackgroundPlaying) {
       this.stopBackgroundAudio();
     }
+  }
+
+  getBackgroundAudioEnabled(): boolean {
+    return this.backgroundAudioEnabled;
+  }
+
+  setMenuBgmEnabled(enabled: boolean) {
+    this.menuBgmEnabled = enabled;
+    
+    if (!enabled && this.isMenuBgmPlaying) {
+      // Immediately stop menu BGM if disabled
+      this.stopMenuBgm();
+    } else if (enabled && !this.isMenuBgmPlaying && this.menuBgmSound) {
+      // Only start if already preloaded (means we're past intro)
+      this.playMenuBgm();
+    }
+  }
+
+  getMenuBgmEnabled(): boolean {
+    return this.menuBgmEnabled;
   }
 
   /**
@@ -140,6 +163,34 @@ class SoundManager {
       console.error('❌ [BGM] Error:', error);
       console.error('❌ [BGM] Error message:', error?.message);
       console.error('❌ [BGM] Error name:', error?.name);
+    }
+  }
+
+  /**
+   * Preload menu BGM without playing
+   * Uses Android raw resource to avoid expo-asset downloadAsync issues in production
+   */
+  async preloadMenuBgm() {
+    console.log('🎵 [MENU-BGM] preloadMenuBgm called');
+    console.log('🎵 [MENU-BGM] menuBgmSound exists?', !!this.menuBgmSound);
+    console.log('🎵 [MENU-BGM] menuBgmEnabled?', this.menuBgmEnabled);
+    
+    if (this.menuBgmSound || !this.menuBgmEnabled) return;
+    
+    await this.ensureInitialized();
+    
+    try {
+      console.log('🎵 [MENU-BGM] Loading menu BGM from Android raw resource...');
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: 'android.resource://com.wobblyrunner.app/raw/menubgm' },
+        { isLooping: true, shouldPlay: false, volume: 0.25 }
+      );
+      this.menuBgmSound = sound;
+      console.log('✅ [MENU-BGM] Menu BGM preloaded successfully!');
+    } catch (error) {
+      console.error('❌ [MENU-BGM] Menu BGM preload FAILED');
+      console.error('❌ [MENU-BGM] Error:', error);
+      console.error('❌ [MENU-BGM] Error message:', error?.message);
     }
   }
 
@@ -217,11 +268,88 @@ class SoundManager {
   }
 
   /**
+   * Play menu BGM (looping)
+   */
+  async playMenuBgm() {
+    if (!this.menuBgmEnabled) {
+      console.log('🔇 [MENU-BGM] Menu BGM disabled in settings');
+      return;
+    }
+    
+    if (this.isMenuBgmPlaying) {
+      console.log('🎵 [MENU-BGM] Menu BGM already playing');
+      return;
+    }
+    
+    this.isMenuBgmPlaying = true;
+    await this.ensureInitialized();
+    
+    try {
+      if (this.menuBgmSound) {
+        console.log('🎵 [MENU-BGM] Playing preloaded menu BGM...');
+        await this.menuBgmSound.playAsync();
+        console.log('✅ [MENU-BGM] Menu BGM started');
+      } else {
+        console.log('🎵 [MENU-BGM] Loading and playing menu BGM...');
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: 'android.resource://com.wobblyrunner.app/raw/menubgm' },
+          { isLooping: true, shouldPlay: true, volume: 0.25 }
+        );
+        this.menuBgmSound = sound;
+        console.log('✅ [MENU-BGM] Menu BGM started (loaded fresh)');
+      }
+    } catch (error) {
+      console.error('❌ [MENU-BGM] Menu BGM play FAILED');
+      console.error('❌ [MENU-BGM] Error:', error);
+      this.isMenuBgmPlaying = false;
+      this.menuBgmSound = null;
+    }
+  }
+
+  /**
+   * Stop menu BGM
+   */
+  async stopMenuBgm() {
+    this.isMenuBgmPlaying = false;
+    
+    if (this.menuBgmSound) {
+      try {
+        console.log('🔇 [MENU-BGM] Stopping menu BGM...');
+        await this.menuBgmSound.stopAsync();
+        console.log('✅ [MENU-BGM] Menu BGM stopped');
+      } catch (error) {
+        console.error('❌ [MENU-BGM] Error stopping menu BGM:', error);
+      }
+    }
+  }
+
+  /**
+   * Resume menu BGM (after gameplay)
+   */
+  async resumeMenuBgm() {
+    if (!this.menuBgmEnabled) return;
+    
+    console.log('🎵 [MENU-BGM] Resuming menu BGM...');
+    await this.playMenuBgm();
+  }
+
+  /**
    * Clean up all audio resources
    * SDK 54 requires proper cleanup
    */
   async cleanup() {
     await this.stopBackgroundAudio();
+    await this.stopMenuBgm();
+    
+    // Unload menu BGM
+    if (this.menuBgmSound) {
+      try {
+        await this.menuBgmSound.unloadAsync();
+        this.menuBgmSound = null;
+      } catch (error) {
+        console.error('Error unloading menu BGM:', error);
+      }
+    }
     
     // Unload all cached sounds
     for (const key in this.sounds) {
