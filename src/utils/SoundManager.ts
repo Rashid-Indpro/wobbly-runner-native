@@ -106,7 +106,7 @@ class SoundManager {
       if (!this.sounds[soundKey]) {
         const { sound } = await Audio.Sound.createAsync(
           fileName as any,
-          { shouldPlay: false }
+          { shouldPlay: false, volume: 0.20 }
         );
         this.sounds[soundKey] = sound;
       }
@@ -154,7 +154,7 @@ class SoundManager {
       // File must be at: android/app/src/main/res/raw/background.mp3
       const { sound } = await Audio.Sound.createAsync(
         { uri: 'android.resource://com.wobblyrunner.app/raw/background' },
-        { isLooping: true, shouldPlay: false, volume: 0.25 }
+        { isLooping: true, shouldPlay: false, volume: 0.55 }
       );
       this.backgroundAudioSound = sound;
       console.log('✅ [BGM] Background audio preloaded successfully!');
@@ -183,7 +183,7 @@ class SoundManager {
       console.log('🎵 [MENU-BGM] Loading menu BGM from Android raw resource...');
       const { sound } = await Audio.Sound.createAsync(
         { uri: 'android.resource://com.wobblyrunner.app/raw/menubgm' },
-        { isLooping: true, shouldPlay: false, volume: 0.25 }
+        { isLooping: true, shouldPlay: false, volume: 0.55 }
       );
       this.menuBgmSound = sound;
       console.log('✅ [MENU-BGM] Menu BGM preloaded successfully!');
@@ -226,7 +226,7 @@ class SoundManager {
         console.log('🎵 [BGM-PLAY] Loading and playing background audio from raw resource...');
         const { sound } = await Audio.Sound.createAsync(
           { uri: 'android.resource://com.wobblyrunner.app/raw/background' },
-          { isLooping: true, shouldPlay: true, volume: 0.25 }
+          { isLooping: true, shouldPlay: true, volume: 0.55 }
         );
         this.backgroundAudioSound = sound;
         console.log('✅ [BGM-PLAY] Background audio started (loaded fresh)');
@@ -293,7 +293,7 @@ class SoundManager {
         console.log('🎵 [MENU-BGM] Loading and playing menu BGM...');
         const { sound } = await Audio.Sound.createAsync(
           { uri: 'android.resource://com.wobblyrunner.app/raw/menubgm' },
-          { isLooping: true, shouldPlay: true, volume: 0.25 }
+          { isLooping: true, shouldPlay: true, volume: 0.55 }
         );
         this.menuBgmSound = sound;
         console.log('✅ [MENU-BGM] Menu BGM started (loaded fresh)');
