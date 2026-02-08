@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface GameplayTipProps {
   onContinue: () => void;
@@ -27,8 +29,12 @@ const GameplayTip: React.FC<GameplayTipProps> = ({ onContinue }) => {
   ];
 
   return (
-    <View style={styles.overlay}>
+    <SafeAreaView style={styles.overlay} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.container}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.emoji}>🎮</Text>
@@ -39,7 +45,7 @@ const GameplayTip: React.FC<GameplayTipProps> = ({ onContinue }) => {
         {/* TO COLLECT Section */}
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { backgroundColor: '#10B98120' }]}>
-            <Icon name="check-circle" size={28} color="#10B981" />
+            <Icon name="check-circle" size={scale(20)} color="#10B981" />
             <Text style={[styles.sectionTitle, { color: '#10B981' }]}>COLLECT THESE</Text>
           </View>
           <View style={styles.iconRow}>
@@ -55,7 +61,7 @@ const GameplayTip: React.FC<GameplayTipProps> = ({ onContinue }) => {
         {/* TO AVOID Section */}
         <View style={styles.section}>
           <View style={[styles.sectionHeader, { backgroundColor: '#EF444420' }]}>
-            <Icon name="x-circle" size={28} color="#EF4444" />
+            <Icon name="x-circle" size={scale(20)} color="#EF4444" />
             <Text style={[styles.sectionTitle, { color: '#EF4444' }]}>AVOID THESE</Text>
           </View>
           <View style={styles.iconGrid}>
@@ -75,10 +81,11 @@ const GameplayTip: React.FC<GameplayTipProps> = ({ onContinue }) => {
           activeOpacity={0.8}
         >
           <Text style={styles.continueText}>CONTINUE TO PLAY</Text>
-          <Icon name="play" size={24} color="#FFFFFF" />
+          <Icon name="play" size={scale(24)} color="#FFFFFF" />
         </TouchableOpacity>
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -93,14 +100,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
-    padding: 20,
+    padding: scale(20),
   },
   container: {
     backgroundColor: '#1F1F23',
-    borderRadius: 24,
+    borderRadius: moderateScale(24),
     width: '100%',
-    maxWidth: 420,
-    padding: 24,
+    maxWidth: wp(90),
+    maxHeight: hp(85),
     borderWidth: 3,
     borderColor: '#3B82F6',
     shadowColor: '#3B82F6',
@@ -109,94 +116,97 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 20,
   },
+  scrollContent: {
+    padding: scale(16),
+  },
   header: {
     alignItems: 'center',
-    marginBottom: 24,
-    paddingBottom: 20,
+    marginBottom: verticalScale(16),
+    paddingBottom: verticalScale(12),
     borderBottomWidth: 2,
     borderBottomColor: '#3B82F6',
   },
   emoji: {
-    fontSize: 48,
-    marginBottom: 12,
+    fontSize: responsiveFontSize(32),
+    marginBottom: verticalScale(6),
   },
   title: {
-    fontSize: 32,
+    fontSize: responsiveFontSize(24),
     fontWeight: 'bold',
     color: '#FFFFFF',
-    marginBottom: 8,
+    marginBottom: verticalScale(4),
     textAlign: 'center',
     letterSpacing: 1,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(12),
     color: '#94A3B8',
     textAlign: 'center',
   },
   section: {
-    marginBottom: 20,
+    marginBottom: verticalScale(12),
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 16,
-    gap: 12,
+    padding: scale(8),
+    borderRadius: moderateScale(8),
+    marginBottom: verticalScale(10),
+    gap: scale(8),
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(16),
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
   iconRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    gap: 12,
+    gap: scale(12),
   },
   iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: scale(12),
     justifyContent: 'center',
   },
   iconCard: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#27272A',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: moderateScale(12),
+    padding: scale(8),
     borderWidth: 2,
-    minWidth: 80,
+    minWidth: scale(65),
   },
   iconLarge: {
-    fontSize: 48,
-    marginBottom: 4,
+    fontSize: responsiveFontSize(32),
+    marginBottom: verticalScale(2),
   },
   iconMedium: {
-    fontSize: 36,
-    marginBottom: 2,
+    fontSize: responsiveFontSize(28),
+    marginBottom: verticalScale(2),
   },
   iconLabel: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(10),
     color: '#D1D5DB',
     fontWeight: '600',
-    marginTop: 4,
+    marginTop: verticalScale(2),
   },
   iconLabelSmall: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(9),
     color: '#9CA3AF',
-    marginTop: 2,
+    marginTop: verticalScale(2),
   },
   continueButton: {
     backgroundColor: '#3B82F6',
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: moderateScale(12),
+    padding: scale(14),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
-    gap: 12,
+    marginTop: verticalScale(12),
+    gap: scale(8),
     shadowColor: '#3B82F6',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
@@ -205,7 +215,7 @@ const styles = StyleSheet.create({
   },
   continueText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: responsiveFontSize(16),
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },

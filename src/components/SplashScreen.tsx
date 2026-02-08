@@ -4,12 +4,11 @@ import {
   Text,
   Image,
   StyleSheet,
-  Dimensions,
   Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from './LinearGradient';
-
-const { width, height } = Dimensions.get('window');
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -119,7 +118,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       {/* Background - enhanced visibility */}
       <View style={styles.background}>
         <View style={styles.glowCircle} />
@@ -249,7 +248,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           </View>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -274,23 +273,23 @@ const styles = StyleSheet.create({
   },
   glowCircle: {
     position: 'absolute',
-    top: height / 2 - width * 0.4,
-    left: width * 0.1,
-    width: width * 0.8,
-    height: width * 0.8,
+    top: hp(50) - wp(40),
+    left: wp(10),
+    width: wp(80),
+    height: wp(80),
     backgroundColor: 'rgba(99, 102, 241, 0.12)',
-    borderRadius: width * 0.4,
+    borderRadius: wp(40),
   },
   flashContainer: {
     position: 'absolute',
-    top: height / 2,
-    left: width / 2,
+    top: hp(50),
+    left: wp(50),
   },
   flash: {
-    width: 4,
-    height: 4,
+    width: scale(4),
+    height: scale(4),
     backgroundColor: '#ffffff',
-    borderRadius: 2,
+    borderRadius: moderateScale(2),
     shadowColor: '#ffffff',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
@@ -298,12 +297,12 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
   },
   logoBox: {
-    width: 112,
-    height: 112,
-    borderRadius: 40,
+    width: scale(112),
+    height: scale(112),
+    borderRadius: moderateScale(40),
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#f97316',
@@ -313,17 +312,17 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   logoEmoji: {
-    fontSize: 64,
+    fontSize: responsiveFontSize(64),
     transform: [{ rotate: '-12deg' }],
   },
   sparkleBox: {
     position: 'absolute',
-    bottom: -16,
-    right: -16,
-    width: 48,
-    height: 48,
+    bottom: scale(-16),
+    right: scale(-16),
+    width: scale(48),
+    height: scale(48),
     backgroundColor: '#ffffff',
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -333,14 +332,14 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   sparkle: {
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
   },
   titleContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: verticalScale(20),
   },
   title: {
-    fontSize: 40,
+    fontSize: responsiveFontSize(40),
     fontWeight: '900',
     color: '#ffffff',
     letterSpacing: 4,
@@ -350,52 +349,52 @@ const styles = StyleSheet.create({
     textShadowRadius: 30,
   },
   subtitleContainer: {
-    marginTop: 10,
+    marginTop: verticalScale(10),
     alignItems: 'center',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: '900',
     color: '#ffffff',
     letterSpacing: 12,
     textTransform: 'uppercase',
   },
   underline: {
-    marginTop: 8,
-    width: width * 0.3,
-    height: 2,
+    marginTop: verticalScale(8),
+    width: wp(30),
+    height: verticalScale(2),
     backgroundColor: '#6366f1',
   },
   foundersContainer: {
     position: 'absolute',
-    bottom: 64,
+    bottom: verticalScale(64),
     alignItems: 'center',
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: verticalScale(32),
   },
   divider: {
-    width: 48,
+    width: scale(48),
     height: 1,
     backgroundColor: '#27272a',
   },
   productionText: {
-    fontSize: 9,
+    fontSize: responsiveFontSize(9),
     fontWeight: '900',
     color: '#71717a',
     letterSpacing: 4,
-    marginHorizontal: 16,
+    marginHorizontal: scale(16),
   },
   foundersRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 48,
+    gap: scale(48),
   },
   founderCard: {
     alignItems: 'center',
-    gap: 16,
+    gap: verticalScale(16),
   },
   avatarGlow: {
     shadowColor: '#f97316',
@@ -405,20 +404,20 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: scale(56),
+    height: scale(56),
+    borderRadius: scale(28),
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   founderName: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '900',
     color: '#ffffff',
     letterSpacing: 2,
   },
   founderRole: {
-    fontSize: 7,
+    fontSize: responsiveFontSize(7),
     fontWeight: '900',
     color: '#52525b',
     letterSpacing: 1,
@@ -426,7 +425,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   separator: {
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
     fontWeight: '900',
     color: '#27272a',
   },

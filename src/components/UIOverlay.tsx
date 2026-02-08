@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
 import { PowerUp } from '../types';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface UIOverlayProps {
   score: number;
@@ -55,7 +57,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
   }, [activePower]);
 
   return (
-    <View style={styles.container} pointerEvents="box-none">
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']} pointerEvents="box-none">
       <View style={styles.topRow}>
         <View style={styles.statsContainer}>
           <View style={styles.scoreBox}>
@@ -123,7 +125,7 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
           })}
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -134,9 +136,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingTop: verticalScale(60),
+    paddingHorizontal: scale(24),
+    paddingBottom: verticalScale(24),
     justifyContent: 'space-between',
   },
   topRow: {
@@ -145,19 +147,19 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   statsContainer: {
-    gap: 4,
+    gap: scale(4),
   },
   scoreBox: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 4,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(4),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   scoreText: {
     color: '#FACC15',
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
     fontWeight: '900',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 2 },
@@ -165,39 +167,39 @@ const styles = StyleSheet.create({
   },
   coinsBox: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 4,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(4),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: scale(8),
   },
   coinsText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
   },
   controlButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: scale(8),
   },
   backButton: {
-    width: 48,
-    height: 48,
+    width: scale(48),
+    height: scale(48),
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   pauseButton: {
-    width: 48,
-    height: 48,
+    width: scale(48),
+    height: scale(48),
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     alignItems: 'center',
@@ -205,40 +207,40 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     alignItems: 'center',
-    gap: 24,
+    gap: verticalScale(24),
   },
   activePowerCard: {
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.3)',
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 24,
+    paddingHorizontal: scale(24),
+    paddingVertical: verticalScale(8),
+    borderRadius: moderateScale(24),
     alignItems: 'center',
-    gap: 4,
+    gap: scale(4),
   },
   activePowerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: scale(12),
   },
   activePowerIcon: {
-    fontSize: 28,
+    fontSize: responsiveFontSize(28),
   },
   activePowerName: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     textTransform: 'uppercase',
     letterSpacing: 2,
   },
   progressBarContainer: {
-    width: 200,
-    height: 8,
+    width: scale(200),
+    height: verticalScale(8),
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderRadius: 4,
+    borderRadius: moderateScale(4),
     overflow: 'hidden',
-    marginTop: 6,
+    marginTop: verticalScale(6),
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
@@ -252,12 +254,12 @@ const styles = StyleSheet.create({
   },
   equippedPowersRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: scale(16),
   },
   powerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: scale(56),
+    height: scale(56),
+    borderRadius: moderateScale(16),
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
@@ -272,14 +274,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   powerButtonIcon: {
-    fontSize: 28,
-    lineHeight: 28,
+    fontSize: responsiveFontSize(28),
+    lineHeight: responsiveFontSize(28),
   },
   powerButtonUses: {
-    fontSize: 10,
+    fontSize: responsiveFontSize(10),
     fontWeight: '900',
     color: '#FFFFFF',
-    marginTop: 2,
+    marginTop: verticalScale(2),
   },
 });
 

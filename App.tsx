@@ -210,6 +210,7 @@ const App: React.FC = () => {
 
   const requestAd = (purpose: 'REVIVE' | 'STORE' | 'SKIN' | 'GET_COINS', item: any = null) => {
     soundManager.stopBackgroundAudio();
+    soundManager.stopMenuBgm();
     setAdPurpose(purpose);
     setAdPurposeItem(item);
     setGameState('AD_WATCHING');
@@ -267,26 +268,45 @@ const App: React.FC = () => {
   };
 
   const handleAdComplete = () => {
-    // Only restart music if it's enabled in settings
-    if (settings.musicEnabled) {
-      soundManager.playBackgroundAudio();
-    }
     if (adPurpose === 'STORE' && adPurposeItem) {
       const newOwned = { ...ownedPowerUses };
       newOwned[adPurposeItem.id] = (newOwned[adPurposeItem.id] || 0) + 3;
       setOwnedPowerUses(newOwned);
       setItem('ownedPowers', newOwned);
       setGameState('STORE');
+      // Resume menu BGM when returning to Store
+      if (settings.menuBgmEnabled) {
+        soundManager.playMenuBgm();
+      }
     } else if (adPurpose === 'GET_COINS') {
       const newCoins = totalCoins + 2500; 
       setTotalCoins(newCoins);
       setItem('coins', newCoins);
       setGameState('STORE');
-    } else if (adPurpose === 'REVIVE') setGameState('PLAYING');
-    else if (adPurpose === 'START') {
+      // Resume menu BGM when returning to Store
+      if (settings.menuBgmEnabled) {
+        soundManager.playMenuBgm();
+      }
+    } else if (adPurpose === 'REVIVE') {
+      setGameState('PLAYING');
+      // Resume gameplay music when reviving
+      if (settings.musicEnabled) {
+        soundManager.playBackgroundAudio();
+      }
+    } else if (adPurpose === 'START') {
       setGameId(prev => prev + 1);
       setGameState('PLAYING');
-    } else setGameState('MAIN_MENU');
+      // Start gameplay music when starting game
+      if (settings.musicEnabled) {
+        soundManager.playBackgroundAudio();
+      }
+    } else {
+      setGameState('MAIN_MENU');
+      // Resume menu BGM when returning to Main Menu
+      if (settings.menuBgmEnabled) {
+        soundManager.playMenuBgm();
+      }
+    }
     setAdPurpose(null);
     setAdPurposeItem(null);
   };

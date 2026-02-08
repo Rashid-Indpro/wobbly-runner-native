@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface GameOverProps {
   score: number;
@@ -42,7 +44,7 @@ const GameOver: React.FC<GameOverProps> = ({ score, coins, onRevive, onFinish, c
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       {/* Funny Splat Visual */}
       <Animated.View style={[styles.splatContainer, { transform: [{ scale: scaleAnim }] }]}>
         <Animated.View style={[styles.glowCircle, { transform: [{ scale: pulseAnim }] }]} />
@@ -95,7 +97,7 @@ const GameOver: React.FC<GameOverProps> = ({ score, coins, onRevive, onFinish, c
       </View>
 
       <Text style={styles.quoteText}>"Better luck next time, wobbly friend!"</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -110,37 +112,37 @@ const styles = StyleSheet.create({
     zIndex: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: scale(32),
   },
   splatContainer: {
     position: 'relative',
-    marginBottom: 32,
+    marginBottom: verticalScale(32),
     alignItems: 'center',
     justifyContent: 'center',
-    width: 160,
-    height: 160,
+    width: scale(160),
+    height: scale(160),
   },
   glowCircle: {
     position: 'absolute',
-    width: 128,
-    height: 128,
+    width: scale(128),
+    height: scale(128),
     backgroundColor: '#FACC15',
-    borderRadius: 64,
+    borderRadius: scale(64),
     opacity: 0.5,
   },
   emojiLarge: {
-    fontSize: 96,
+    fontSize: responsiveFontSize(96),
     textAlign: 'center',
     transform: [{ rotate: '12deg' }],
   },
   splatBadge: {
     position: 'absolute',
-    bottom: -16,
-    left: -16,
+    bottom: scale(-16),
+    left: scale(-16),
     backgroundColor: '#DC2626',
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(4),
+    borderRadius: moderateScale(12),
     transform: [{ rotate: '-12deg' }],
     borderWidth: 4,
     borderColor: '#FFFFFF',
@@ -153,22 +155,22 @@ const styles = StyleSheet.create({
   splatText: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     letterSpacing: 1,
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   titleLine1: {
-    fontSize: 48,
+    fontSize: responsiveFontSize(48),
     fontWeight: '900',
     color: '#FFFFFF',
     textAlign: 'center',
     letterSpacing: 2,
   },
   titleLine2: {
-    fontSize: 48,
+    fontSize: responsiveFontSize(48),
     fontWeight: '900',
     color: '#FFFFFF',
     textAlign: 'center',
@@ -176,34 +178,34 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 40,
+    gap: verticalScale(8),
+    marginBottom: verticalScale(40),
   },
   scoreText: {
     color: '#FACC15',
     fontWeight: '900',
-    fontSize: 28,
+    fontSize: responsiveFontSize(28),
     letterSpacing: 1,
   },
   coinsText: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
   },
   buttonsContainer: {
     width: '100%',
-    maxWidth: 320,
-    gap: 16,
+    maxWidth: wp(85),
+    gap: verticalScale(16),
   },
   reviveButton: {
     width: '100%',
     backgroundColor: '#3B82F6',
-    paddingVertical: 20,
-    borderRadius: 24,
+    paddingVertical: verticalScale(20),
+    borderRadius: moderateScale(24),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: scale(12),
     shadowColor: '#1D4ED8',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
@@ -213,22 +215,22 @@ const styles = StyleSheet.create({
   reviveButtonText: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
     letterSpacing: 1,
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: scale(16),
   },
   retryButton: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    borderRadius: 24,
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(24),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: scale(8),
     shadowColor: '#EA580C',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
@@ -238,18 +240,18 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#EA580C',
     fontWeight: '900',
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
     letterSpacing: 0.5,
   },
   menuButton: {
     flex: 1,
     backgroundColor: '#374151',
-    paddingVertical: 16,
-    borderRadius: 24,
+    paddingVertical: verticalScale(16),
+    borderRadius: moderateScale(24),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: scale(8),
     shadowColor: '#1F2937',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
@@ -259,13 +261,13 @@ const styles = StyleSheet.create({
   menuButtonText: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
     letterSpacing: 0.5,
   },
   quoteText: {
-    marginTop: 32,
+    marginTop: verticalScale(32),
     color: 'rgba(255, 255, 255, 0.4)',
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     fontStyle: 'italic',
     fontWeight: '700',
     textAlign: 'center',

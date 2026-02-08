@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather as Icon } from '@expo/vector-icons';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface TutorialProps {
   onComplete: () => void;
@@ -81,7 +83,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onComplete }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: current.bg }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: current.bg }]} edges={['top', 'left', 'right', 'bottom']}>
       <Animated.View 
         style={[
           styles.iconContainer,
@@ -121,7 +123,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onComplete }) => {
           ))}
         </View>
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -134,13 +136,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: scale(32),
   },
   iconContainer: {
-    marginBottom: 48,
+    marginBottom: verticalScale(48),
   },
   iconLarge: {
-    fontSize: 108,
+    fontSize: responsiveFontSize(108),
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 4 },
@@ -148,42 +150,42 @@ const styles = StyleSheet.create({
   },
   contentCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 48,
-    padding: 40,
+    borderRadius: moderateScale(48),
+    padding: scale(40),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
     shadowRadius: 30,
     elevation: 20,
-    maxWidth: 384,
+    maxWidth: wp(90),
     width: '100%',
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: responsiveFontSize(28),
     fontWeight: '900',
     color: '#000000',
-    marginBottom: 16,
+    marginBottom: verticalScale(16),
     textAlign: 'center',
     letterSpacing: 1,
   },
   description: {
     color: '#52525B',
     fontWeight: '700',
-    fontSize: 16,
-    marginBottom: 32,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(16),
+    marginBottom: verticalScale(32),
+    lineHeight: scale(24),
     textAlign: 'center',
   },
   nextButton: {
     width: '100%',
     backgroundColor: '#000000',
-    paddingVertical: 20,
-    borderRadius: 24,
+    paddingVertical: verticalScale(20),
+    borderRadius: moderateScale(24),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: scale(8),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
@@ -193,25 +195,25 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: '#FFFFFF',
     fontWeight: '900',
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     letterSpacing: 1,
   },
   dotsContainer: {
     flexDirection: 'row',
-    gap: 8,
+    gap: scale(8),
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: verticalScale(24),
   },
   dot: {
-    height: 8,
-    borderRadius: 4,
+    height: verticalScale(8),
+    borderRadius: moderateScale(4),
   },
   dotActive: {
-    width: 32,
+    width: scale(32),
     backgroundColor: '#000000',
   },
   dotInactive: {
-    width: 8,
+    width: scale(8),
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
 });

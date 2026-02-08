@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { Feather as Icon } from '@expo/vector-icons';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface LegalWebViewProps {
   url: string;
@@ -95,9 +96,9 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#4338ca',
-    paddingTop: 50,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
+    paddingTop: verticalScale(50),
+    paddingBottom: verticalScale(15),
+    paddingHorizontal: scale(20),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -108,52 +109,52 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   backButton: {
-    padding: 8,
+    padding: scale(8),
   },
   headerTitle: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: '600',
     flex: 1,
     textAlign: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: scale(10),
   },
   placeholder: {
-    width: 40,
+    width: scale(40),
   },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    padding: scale(40),
   },
   contentTitle: {
     color: '#ffffff',
-    fontSize: 24,
+    fontSize: responsiveFontSize(24),
     fontWeight: '700',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: verticalScale(20),
+    marginBottom: verticalScale(10),
     textAlign: 'center',
   },
   contentDescription: {
     color: '#a1a1aa',
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(16),
+    lineHeight: scale(24),
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
   },
   reopenButton: {
     backgroundColor: '#4338ca',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 25,
-    borderRadius: 12,
-    gap: 10,
+    paddingVertical: verticalScale(15),
+    paddingHorizontal: scale(25),
+    borderRadius: moderateScale(12),
+    gap: scale(10),
   },
   reopenButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
     fontWeight: '600',
   },
 });

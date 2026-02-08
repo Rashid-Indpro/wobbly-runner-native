@@ -5,6 +5,7 @@ import { Feather as Icon } from '@expo/vector-icons';
 import { Settings, BGMTrack, LegalPageType } from '../types';
 import AboutUs from './AboutUs';
 import { storage } from '../utils/storage';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface SettingsScreenProps {
   settings: Settings;

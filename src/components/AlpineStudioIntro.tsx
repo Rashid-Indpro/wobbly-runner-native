@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from './LinearGradient';
+import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from '../utils/responsive';
 
 interface AlpineStudioIntroProps {
   onComplete: () => void;
@@ -129,7 +131,7 @@ const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => 
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.logoContainer}>
         {/* Logo with gradient text effect */}
         <Animated.View
@@ -184,7 +186,7 @@ const AlpineStudioIntro: React.FC<AlpineStudioIntroProps> = ({ onComplete }) => 
           </Animated.View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -204,18 +206,18 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: 'System',
-    fontSize: 56, // 3.5rem
+    fontSize: responsiveFontSize(56),
     fontWeight: '700',
     letterSpacing: -0.5,
     color: 'black',
-    marginBottom: 10,
+    marginBottom: verticalScale(10),
   },
   transparentText: {
     opacity: 0,
   },
   presents: {
     fontFamily: 'System',
-    fontSize: 16, // 1rem
+    fontSize: responsiveFontSize(16),
     fontWeight: '400',
     color: '#8a8a9e',
     letterSpacing: 3,
@@ -223,16 +225,16 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     position: 'absolute',
-    bottom: -25,
-    width: 200,
-    height: 2,
+    bottom: verticalScale(-25),
+    width: scale(200),
+    height: verticalScale(2),
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderRadius: 1,
+    borderRadius: moderateScale(1),
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 1,
+    borderRadius: moderateScale(1),
   },
   progressGradient: {
     width: '100%',

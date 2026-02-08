@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Vibration, Animated, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, PanResponder, Vibration, Animated, BackHandler } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, PowerUp, PowerUpType, Obstacle, Collectible, Skin, ObstacleBehavior } from '../types';
 import { POWER_UPS, INITIAL_SPEED, SPAWN_RATE, COIN_VALUE } from '../constants';
 import UIOverlay from './UIOverlay';
 import GameOver from './GameOver';
 import GameplayTip from './GameplayTip';
 import { soundManager } from '../utils/SoundManager';
+import { wp, hp, scale, verticalScale, getScreenDimensions } from '../utils/responsive';
 
 // Polyfill for React Native compatibility
 // React Native doesn't have requestAnimationFrame/cancelAnimationFrame/performance in global scope
@@ -40,7 +42,11 @@ interface GameContainerProps {
   isExternalAdShowing?: boolean;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+// Get screen dimensions dynamically
+const getGameDimensions = () => {
+  const { width, height } = getScreenDimensions();
+  return { SCREEN_WIDTH: width, SCREEN_HEIGHT: height };
+};
 
 const GameContainer: React.FC<GameContainerProps> = ({ 
   settings, 
@@ -63,13 +69,16 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [reviveCount, setReviveCount] = useState(0);
   const [, forceUpdate] = useState(0);
   
+  // Get initial dimensions
+  const { SCREEN_WIDTH, SCREEN_HEIGHT } = getGameDimensions();
+  
   // Character effect animations
   const collectEffectScale = useRef(new Animated.Value(1)).current;
   const collectEffectGlow = useRef(new Animated.Value(0)).current;
   const collectEffectRotation = useRef(new Animated.Value(0)).current;
   
   const gameStateRef = useRef({
-    player: { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 150, targetX: SCREEN_WIDTH / 2, lane: 1, width: 40, height: 40, wobble: 0 },
+    player: { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 150, targetX: SCREEN_WIDTH / 2, lane: 1, width: scale(40), height: scale(40), wobble: 0 },
     obstacles: [] as Obstacle[],
     collectibles: [] as Collectible[],
     speed: INITIAL_SPEED,
@@ -546,7 +555,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const state = gameStateRef.current;
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
+      <View style={styles.container} {...panResponder.panHandlers}>
       {/* Background */}
       <View style={styles.gameArea}>
         {/* Lane lines */}
@@ -688,7 +698,8 @@ const GameContainer: React.FC<GameContainerProps> = ({
       {showGameplayTip && (
         <GameplayTip onContinue={handleGameplayTipContinue} />
       )}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
