@@ -61,12 +61,15 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']} pointerEvents="box-none">
       <View style={styles.topRow}>
-        <View style={styles.statsContainer}>
-          <View style={styles.scoreBox}>
-            <Text style={styles.scoreText}>{score}</Text>
-          </View>
-          <View style={styles.coinsBox}>
-            <Text style={styles.coinsText}>🪙 {coins}</Text>
+        {/* Left side: Score and coins in one compact row */}
+        <View style={styles.leftStatsContainer}>
+          <View style={styles.scoreCoinsRow}>
+            <View style={styles.scoreBox}>
+              <Text style={styles.scoreText}>{score}</Text>
+            </View>
+            <View style={styles.coinsBox}>
+              <Text style={styles.coinsText}>🪙 {coins}</Text>
+            </View>
           </View>
           <View style={styles.livesBox}>
             <Text style={styles.livesText}>
@@ -75,13 +78,14 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
           </View>
         </View>
 
+        {/* Right side: Control buttons */}
         <View style={styles.controlButtons}>
           <TouchableOpacity 
             onPress={onBack}
             style={styles.backButton}
             activeOpacity={0.8}
           >
-            <Icon name="arrow-left" size={24} color="#FFFFFF" />
+            <Icon name="arrow-left" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -90,9 +94,9 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
             activeOpacity={0.8}
           >
             {isPaused ? (
-              <Icon name="play" size={24} color="#FFFFFF" />
+              <Icon name="play" size={20} color="#FFFFFF" />
             ) : (
-              <Icon name="pause" size={24} color="#FFFFFF" />
+              <Icon name="pause" size={20} color="#FFFFFF" />
             )}
           </TouchableOpacity>
         </View>
@@ -143,8 +147,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingTop: verticalScale(60),
-    paddingHorizontal: scale(24),
+    paddingTop: verticalScale(12),
+    paddingHorizontal: scale(16),
     paddingBottom: verticalScale(24),
     justifyContent: 'space-between',
   },
@@ -153,75 +157,82 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  statsContainer: {
-    gap: scale(4),
+  leftStatsContainer: {
+    gap: scale(6),
+  },
+  scoreCoinsRow: {
+    flexDirection: 'row',
+    gap: scale(6),
   },
   scoreBox: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: moderateScale(16),
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(4),
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    minWidth: scale(60),
   },
   scoreText: {
     color: '#FACC15',
-    fontSize: responsiveFontSize(24),
+    fontSize: responsiveFontSize(22),
     fontWeight: '900',
+    textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   coinsBox: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: moderateScale(16),
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(4),
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(8),
+    gap: scale(4),
   },
   coinsText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: responsiveFontSize(14),
+    fontSize: responsiveFontSize(13),
   },
   livesBox: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: moderateScale(16),
-    paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(4),
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(6),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.25)',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   livesText: {
-    fontSize: responsiveFontSize(14),
+    fontSize: responsiveFontSize(13),
   },
   controlButtons: {
     flexDirection: 'row',
-    gap: scale(8),
+    gap: scale(6),
   },
   backButton: {
-    width: scale(48),
-    height: scale(48),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: moderateScale(16),
+    width: scale(42),
+    height: scale(42),
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderRadius: moderateScale(12),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   pauseButton: {
-    width: scale(48),
-    height: scale(48),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: moderateScale(16),
+    width: scale(42),
+    height: scale(42),
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderRadius: moderateScale(12),
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
