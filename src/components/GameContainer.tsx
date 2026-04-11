@@ -13,7 +13,7 @@ import { wp, hp, scale, verticalScale, getScreenDimensions } from '../utils/resp
 // React Native doesn't have requestAnimationFrame/cancelAnimationFrame/performance in global scope
 if (typeof requestAnimationFrame === 'undefined') {
   (global as any).requestAnimationFrame = (callback: (time: number) => void) => {
-    return setTimeout(() => callback(Date.now()), 1000 / 50) as unknown as number; // 50fps for smoother mobile
+    return setTimeout(() => callback(Date.now()), 1000 / 60) as unknown as number; // 60fps for ultra-smooth mobile
   };
 }
 
@@ -94,6 +94,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
 
   const animationFrameRef = useRef<number | null>(null);
   const lastCollisionTimeRef = useRef<number>(0);
+  const lastFrameTimeRef = useRef<number>(Date.now()); // For delta-time smooth movement
+  const lastUIUpdateRef = useRef<number>(0); // Batch UI updates to prevent slowdown
+  const smoothDeltaRef = useRef<number>(1); // Smoothed delta time for stable movement
 
   const getLaneX = (lane: number, canvasWidth: number) => (canvasWidth / 3) * lane + (canvasWidth / 3) / 2;
 
@@ -287,16 +290,35 @@ const GameContainer: React.FC<GameContainerProps> = ({
     const update = () => {
       if (isPaused || gameStateRef.current.gameOver) return;
       const state = gameStateRef.current;
+      
+      // Calculate delta time for frame-independent movement
+      const currentTime = Date.now();
+      let deltaTime = (currentTime - lastFrameTimeRef.current) / 16.67; // Normalize to 60fps
+      lastFrameTimeRef.current = currentTime;
+      
+      // Smooth delta time to reduce micro-stutters
+      deltaTime = Math.min(deltaTime, 2); // Cap at 2x for stability
+      smoothDeltaRef.current = smoothDeltaRef.current * 0.9 + deltaTime * 0.1; // Exponential smoothing
+      const stableDelta = smoothDeltaRef.current; // Use smoothed delta for consistent movement
+      
       state.frame++;      
-      // Only log every 300 frames to avoid spam
+      // Only log once to avoid spam
       if (state.frame === 300) {
-        console.log('🎮 Game animation optimized for mobile - smoother movement enabled');
+        console.log('🎮 Ultra-smooth 60fps game loop enabled');
       }
-            state.speed = INITIAL_SPEED * getSpeedMultiplier(state.score);
+      
+      state.speed = INITIAL_SPEED * getSpeedMultiplier(state.score);
       state.score += (1 * activeSkin.perks.scoreMult);
-      setScore(Math.floor(state.score / 10));
-      state.player.x += (state.player.targetX - state.player.x) * 0.12; // Reduced from 0.22 for smoother movement
-      state.player.wobble = Math.sin(state.frame * 0.08) * 5; // Reduced frequency and amplitude for mobile
+      
+      // Batch UI updates every 100ms to prevent blocking game loop
+      if (currentTime - lastUIUpdateRef.current > 100) {
+        setScore(Math.floor(state.score / 10));
+        setCoinsCollected(Math.floor(state.coins));
+        lastUIUpdateRef.current = currentTime;
+      }
+      
+      state.player.x += (state.player.targetX - state.player.x) * 0.2; // Smooth responsive movement
+      state.player.wobble = Math.sin(state.frame * 0.07) * 4; // Smooth wobble
 
       if (activePower && Date.now() > activePower.expiry) setActivePower(null);
       
@@ -314,14 +336,26 @@ const GameContainer: React.FC<GameContainerProps> = ({
       for (let i = state.obstacles.length - 1; i >= 0; i--) {
         const obs = state.obstacles[i];
         if (activePower?.type !== PowerUpType.TIME_FREEZE) {
-          obs.y += obs.speed * (activePower?.type === PowerUpType.SONIC_DASH ? 1.5 : 1);
-          obs.rotation += 0.03; // Reduced from 0.05 for smoother rotation
-          if (obs.behavior === 'SINE_WAVE') obs.x = obs.baseX + Math.sin(obs.y * 0.015) * 45; // Reduced frequency and amplitude
+          // Delta-time for perfectly smooth vertical movement
+          obs.y += Math.round(obs.speed * stableDelta * (activePower?.type === PowerUpType.SONIC_DASH ? 1.5 : 1) * 100) / 100; // Round to 2 decimals
+          obs.rotation += 0.03 * stableDelta; // Smooth rotation
+          
+          // Use frame-based horizontal movement to prevent accumulated errors
+          if (obs.behavior === 'SINE_WAVE') {
+            // Clean sine wave with consistent amplitude
+            obs.x = Math.round((obs.baseX + Math.sin(state.frame * 0.035) * 45) * 10) / 10; // Round to 1 decimal
+          }
           else if (obs.behavior === 'LANE_SWITCH' && state.frame % 120 === 0) {
             obs.lane = Math.max(0, Math.min(2, obs.lane + (Math.random() > 0.5 ? 1 : -1)));
             obs.baseX = getLaneX(obs.lane, state.canvasWidth);
-          } else if (obs.behavior === 'TELEPORT' && state.frame % 60 === 0) obs.x = obs.baseX + (Math.random() - 0.5) * 40;
-          if (obs.behavior === 'LANE_SWITCH') obs.x += (obs.baseX - obs.x) * 0.03; // Reduced from 0.05
+          } 
+          else if (obs.behavior === 'TELEPORT' && state.frame % 60 === 0) {
+            obs.x = obs.baseX + (Math.random() - 0.5) * 40;
+          }
+          
+          if (obs.behavior === 'LANE_SWITCH') {
+            obs.x += (obs.baseX - obs.x) * 0.15; // Smooth lane transitions
+          }
         }
 
         const dx = Math.abs(obs.x - state.player.x);
@@ -338,6 +372,9 @@ const GameContainer: React.FC<GameContainerProps> = ({
               // GAME OVER on 4th collision - Trigger ad first
               console.log('💥 GAME OVER! 4th collision - Final score:', Math.floor(state.score / 10), 'Coins:', Math.floor(state.coins));
               state.gameOver = true;
+              // Update final scores/coins display
+              setScore(Math.floor(state.score / 10));
+              setCoinsCollected(Math.floor(state.coins));
               soundManager.playFail();
               soundManager.stopBackgroundAudio();
               if (settings.vibrationEnabled) {
@@ -381,43 +418,39 @@ const GameContainer: React.FC<GameContainerProps> = ({
         const dist = Math.sqrt(Math.pow(coll.x - state.player.x, 2) + Math.pow(coll.y - state.player.y, 2));
 
         if (totalMagnet > 0 && dist < totalMagnet && (coll.type === 'COIN' || coll.type === 'GEM')) {
-           coll.x += (state.player.x - coll.x) * 0.15; // Reduced from 0.25
-           coll.y += (state.player.y - coll.y) * 0.15; // Reduced from 0.25
-        } else if (activePower?.type !== PowerUpType.TIME_FREEZE) coll.y += state.speed;
+           coll.x += (state.player.x - coll.x) * 0.2; // Smooth magnetic pull
+           coll.y += (state.player.y - coll.y) * 0.2;
+        } else if (activePower?.type !== PowerUpType.TIME_FREEZE) {
+          coll.y += Math.round(state.speed * stableDelta * 100) / 100; // Smooth vertical movement with rounding
+        }
 
         if (Math.abs(coll.x - state.player.x) < 45 && Math.abs(coll.y - state.player.y) < 45) {
           if (coll.type === 'COIN') {
-            console.log('🪙 Coin collected! Total coins:', Math.floor(state.coins + (currentCoinValue * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * activeSkin.perks.coinMult);
-            triggerCollectEffect('COIN'); // ✨ EFFECT TRIGGER
-            if (settings.vibrationEnabled) {
-              Vibration.vibrate(10); // Light tap for coin
+            // Trigger effect only every 3rd coin to prevent slowdown
+            if (Math.floor(state.coins / currentCoinValue) % 3 === 0) {
+              triggerCollectEffect('COIN');
             }
+            soundManager.playCollect();
+            if (settings.vibrationEnabled) Vibration.vibrate(10);
           }
           else if (coll.type === 'GEM') {
-            console.log('💎 Gem collected! Total coins:', Math.floor(state.coins + (currentCoinValue * 5 * activeSkin.perks.coinMult)));
             state.coins += (currentCoinValue * 5 * activeSkin.perks.coinMult);
-            triggerCollectEffect('GEM'); // ✨ EFFECT TRIGGER
-            if (settings.vibrationEnabled) {
-              Vibration.vibrate([0, 20, 10, 20]); // Double tap for gem
-            }
+            triggerCollectEffect('GEM');
+            soundManager.playCollect();
+            if (settings.vibrationEnabled) Vibration.vibrate([0, 20, 10, 20]);
           }
           else if (coll.powerType) {
-            console.log('⚡ Power-up collected:', coll.powerType);
             setActivePower({ 
               type: coll.powerType, 
               start: Date.now(), 
               expiry: Date.now() + POWER_UPS[coll.powerType].duration + activeSkin.perks.invincibilityBonus 
             });
             state.powerUpsUsed++;
-            triggerCollectEffect('POWER_UP'); // ✨ EFFECT TRIGGER
+            triggerCollectEffect('POWER_UP');
             soundManager.playPowerUp();
-            if (settings.vibrationEnabled) {
-              Vibration.vibrate(50); // Medium vibration for power-up
-            }
+            if (settings.vibrationEnabled) Vibration.vibrate(50);
           }
-          setCoinsCollected(Math.floor(state.coins));
-          soundManager.playCollect();
           state.collectibles.splice(i, 1);
           continue;
         }
