@@ -7,12 +7,10 @@ import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from 
 interface GameOverProps {
   score: number;
   coins: number;
-  onRevive: () => void;
   onFinish: (action: 'RETRY' | 'MENU') => void;
-  canRevive: boolean;
 }
 
-const GameOver: React.FC<GameOverProps> = ({ score, coins, onRevive, onFinish, canRevive }) => {
+const GameOver: React.FC<GameOverProps> = ({ score, coins, onFinish }) => {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -65,17 +63,6 @@ const GameOver: React.FC<GameOverProps> = ({ score, coins, onRevive, onFinish, c
       </View>
 
       <View style={styles.buttonsContainer}>
-        {canRevive && (
-          <TouchableOpacity 
-            onPress={onRevive}
-            style={styles.reviveButton}
-            activeOpacity={0.8}
-          >
-            <Icon name="play-circle" size={28} color="#FFFFFF" />
-            <Text style={styles.reviveButtonText}>REVIVE</Text>
-          </TouchableOpacity>
-        )}
-        
         <View style={styles.actionButtonsRow}>
           <TouchableOpacity 
             onPress={() => onFinish('RETRY')}
@@ -196,27 +183,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: wp(85),
     gap: verticalScale(16),
-  },
-  reviveButton: {
-    width: '100%',
-    backgroundColor: '#3B82F6',
-    paddingVertical: verticalScale(20),
-    borderRadius: moderateScale(24),
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: scale(12),
-    shadowColor: '#1D4ED8',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
-  },
-  reviveButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '900',
-    fontSize: responsiveFontSize(24),
-    letterSpacing: 1,
   },
   actionButtonsRow: {
     flexDirection: 'row',

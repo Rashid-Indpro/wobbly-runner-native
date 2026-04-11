@@ -8,6 +8,7 @@ import { wp, hp, scale, verticalScale, moderateScale, responsiveFontSize } from 
 interface UIOverlayProps {
   score: number;
   coins: number;
+  lives: number;
   activePower: (PowerUp & { currentExpiry: number, currentStart: number }) | null;
   onPause: () => void;
   onBack: () => void;
@@ -20,6 +21,7 @@ interface UIOverlayProps {
 const UIOverlay: React.FC<UIOverlayProps> = ({ 
   score, 
   coins, 
+  lives,
   activePower, 
   onPause, 
   onBack,
@@ -65,6 +67,11 @@ const UIOverlay: React.FC<UIOverlayProps> = ({
           </View>
           <View style={styles.coinsBox}>
             <Text style={styles.coinsText}>🪙 {coins}</Text>
+          </View>
+          <View style={styles.livesBox}>
+            <Text style={styles.livesText}>
+              {Array.from({ length: 3 }, (_, i) => i < lives ? '❤️' : '💔').join(' ')}
+            </Text>
           </View>
         </View>
 
@@ -179,6 +186,19 @@ const styles = StyleSheet.create({
   coinsText: {
     color: '#FFFFFF',
     fontWeight: '700',
+    fontSize: responsiveFontSize(14),
+  },
+  livesBox: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: moderateScale(16),
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(4),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  livesText: {
     fontSize: responsiveFontSize(14),
   },
   controlButtons: {

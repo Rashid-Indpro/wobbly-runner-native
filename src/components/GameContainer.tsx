@@ -36,10 +36,10 @@ interface GameContainerProps {
   equippedPowers: PowerUp[];
   ownedPowerUses: Record<string, number>;
   onUsePower: (id: string) => void;
-  onRequestRevive: () => void;
+  onRequestGameOverAd: () => void;
+  isAdShowingForGameOver: boolean;
   onExit: () => void;
   onMarkGameplayTipSeen: () => void;
-  isExternalAdShowing?: boolean;
 }
 
 // Get screen dimensions dynamically
@@ -55,10 +55,10 @@ const GameContainer: React.FC<GameContainerProps> = ({
   equippedPowers, 
   ownedPowerUses, 
   onUsePower, 
-  onRequestRevive, 
+  onRequestGameOverAd,
+  isAdShowingForGameOver,
   onExit, 
-  onMarkGameplayTipSeen,
-  isExternalAdShowing = false
+  onMarkGameplayTipSeen
 }) => {
   const [score, setScore] = useState(0);
   const [coinsCollected, setCoinsCollected] = useState(0);
@@ -66,7 +66,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   const [showGameOver, setShowGameOver] = useState(false);
   const [showGameplayTip, setShowGameplayTip] = useState(!settings.hasSeenGameplayTip);
   const [activePower, setActivePower] = useState<{type: PowerUpType, expiry: number, start: number} | null>(null);
-  const [reviveCount, setReviveCount] = useState(0);
+  const [lives, setLives] = useState(3);
   const [, forceUpdate] = useState(0);
   
   // Get initial dimensions
@@ -93,7 +93,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   });
 
   const animationFrameRef = useRef<number | null>(null);
-  const wasAdShowingRef = useRef(false);
+  const lastCollisionTimeRef = useRef<number>(0);
 
   const getLaneX = (lane: number, canvasWidth: number) => (canvasWidth / 3) * lane + (canvasWidth / 3) / 2;
 
@@ -192,19 +192,14 @@ const GameContainer: React.FC<GameContainerProps> = ({
     return (1.0 + Math.pow(s / 800, 0.85)) * (1.0 - skinReduc);
   };
 
-  // Revive effect
+  // Show game over screen after ad completes
   useEffect(() => {
-    if (wasAdShowingRef.current && !isExternalAdShowing && gameStateRef.current.gameOver) {
-      gameStateRef.current.gameOver = false;
-      setShowGameOver(false);
-      gameStateRef.current.obstacles = gameStateRef.current.obstacles.filter(
-        o => Math.abs(o.y - gameStateRef.current.player.y) > 300
-      );
-      setActivePower({ type: PowerUpType.INVINCIBLE, start: Date.now(), expiry: Date.now() + 3000 });
-      soundManager.playBackgroundAudio();
+    // When ad finishes showing (transitions from true to false), display game over screen
+    if (!isAdShowingForGameOver && gameStateRef.current.gameOver && !showGameOver) {
+      console.log('📺 Ad completed - Showing game over screen');
+      setShowGameOver(true);
     }
-    wasAdShowingRef.current = isExternalAdShowing;
-  }, [isExternalAdShowing]);
+  }, [isAdShowingForGameOver, showGameOver]);
 
   // Music management - Stop menu BGM, play gameplay BGM
   useEffect(() => {
@@ -214,14 +209,11 @@ const GameContainer: React.FC<GameContainerProps> = ({
     if (!settings.musicEnabled) {
       // Gameplay music disabled in settings - stop in ALL circumstances
       soundManager.stopBackgroundAudio();
-    } else if (isExternalAdShowing) {
-      // Stop music during ads (even if enabled)
-      soundManager.stopBackgroundAudio();
     } else {
       // Play gameplay music if enabled (regardless of pause/game over state)
       soundManager.playBackgroundAudio();
     }
-  }, [isExternalAdShowing, settings.musicEnabled]);
+  }, [settings.musicEnabled]);
   
   // Cleanup on unmount - stop gameplay music and resume menu BGM
   useEffect(() => {
@@ -293,7 +285,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
     };
 
     const update = () => {
-      if (isPaused || gameStateRef.current.gameOver || isExternalAdShowing) return;
+      if (isPaused || gameStateRef.current.gameOver) return;
       const state = gameStateRef.current;
       state.frame++;      
       // Only log every 300 frames to avoid spam
@@ -336,15 +328,44 @@ const GameContainer: React.FC<GameContainerProps> = ({
         const dy = Math.abs(obs.y - state.player.y);
         
         if (!isInvincible && dx < 44 && dy < 48) {
-          console.log('💥 Game Over! Final score:', Math.floor(state.score / 10), 'Coins:', Math.floor(state.coins));
-          state.gameOver = true;
-          setShowGameOver(true);
-          soundManager.playFail();
-          soundManager.stopBackgroundAudio();
-          if (settings.vibrationEnabled) {
-            Vibration.vibrate(200); // Heavy vibration for game over
+          const currentTime = Date.now();
+          // Cooldown: prevent life loss within 1.5 seconds of last collision
+          if (currentTime - lastCollisionTimeRef.current > 1500) {
+            lastCollisionTimeRef.current = currentTime;
+            
+            // Check if this is the 4th collision (lives already at 0)
+            if (lives === 0) {
+              // GAME OVER on 4th collision - Trigger ad first
+              console.log('💥 GAME OVER! 4th collision - Final score:', Math.floor(state.score / 10), 'Coins:', Math.floor(state.coins));
+              state.gameOver = true;
+              soundManager.playFail();
+              soundManager.stopBackgroundAudio();
+              if (settings.vibrationEnabled) {
+                Vibration.vibrate(300); // Longer vibration for final game over
+              }
+              // Trigger ad before showing game over screen
+              onRequestGameOverAd();
+            } else {
+              // First 3 collisions: just lose a life
+              const newLives = lives - 1;
+              setLives(newLives);
+              console.log('💥 Collision! Lives remaining:', newLives);
+              
+              // Grant temporary invincibility (1.5 seconds) after collision
+              setActivePower({ type: PowerUpType.INVINCIBLE, start: currentTime, expiry: currentTime + 1500 });
+              
+              soundManager.playFail();
+              if (settings.vibrationEnabled) {
+                Vibration.vibrate(200);
+              }
+              
+              // Remove nearby obstacles to prevent immediate follow-up collisions
+              state.obstacles = state.obstacles.filter(
+                o => Math.abs(o.y - state.player.y) > 200
+              );
+            }
           }
-          break;
+          break; // Exit obstacle loop after handling collision
         }
         
         if (obs.y > state.canvasHeight + 200) {
@@ -422,7 +443,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPaused, activePower, activeSkin, isExternalAdShowing]);
+  }, [isPaused, activePower, activeSkin]);
 
   // Android hardware back button handler
   useEffect(() => {
@@ -439,7 +460,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
   }, [showGameOver]);
 
   const handleManualPowerUse = (power: PowerUp) => {
-    if (gameStateRef.current.gameOver || isPaused || isExternalAdShowing) return;
+    if (gameStateRef.current.gameOver || isPaused) return;
     if ((ownedPowerUses[power.id] || 0) > 0) {
       onUsePower(power.id);
       setActivePower({ 
@@ -471,7 +492,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         return Math.abs(gestureState.dx) > 10 || Math.abs(gestureState.dy) > 10;
       },
       onPanResponderGrant: (evt) => {
-        if (gameStateRef.current.gameOver || isExternalAdShowing) return;
+        if (gameStateRef.current.gameOver) return;
         // Store initial touch position
         gestureState.current = {
           startX: evt.nativeEvent.pageX,
@@ -481,7 +502,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         };
       },
       onPanResponderMove: (evt, gesture) => {
-        if (gameStateRef.current.gameOver || isExternalAdShowing) return;
+        if (gameStateRef.current.gameOver) return;
         // Detect if user is swiping (not just tapping)
         const horizontalDistance = Math.abs(gesture.dx);
         const verticalDistance = Math.abs(gesture.dy);
@@ -492,7 +513,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
         }
       },
       onPanResponderRelease: (evt, gesture) => {
-        if (gameStateRef.current.gameOver || isExternalAdShowing) return;
+        if (gameStateRef.current.gameOver) return;
         
         const timeDiff = Date.now() - gestureState.current.startTime;
         const horizontalDistance = gesture.dx;
@@ -664,6 +685,7 @@ const GameContainer: React.FC<GameContainerProps> = ({
       <UIOverlay 
         score={score} 
         coins={coinsCollected} 
+        lives={lives}
         activePower={activePower ? { 
           ...POWER_UPS[activePower.type], 
           currentExpiry: activePower.expiry, 
@@ -680,18 +702,11 @@ const GameContainer: React.FC<GameContainerProps> = ({
         onUseEquippedPower={handleManualPowerUse}
       />
 
-      {showGameOver && !isExternalAdShowing && (
+      {showGameOver && (
         <GameOver 
           score={score} 
           coins={coinsCollected} 
-          onRevive={() => { 
-            if (reviveCount < 1) { 
-              setReviveCount(1); 
-              onRequestRevive(); 
-            } 
-          }} 
           onFinish={(action) => onGameOver(score, gameStateRef.current.coins, gameStateRef.current.powerUpsUsed, action)} 
-          canRevive={reviveCount < 1} 
         />
       )}
 

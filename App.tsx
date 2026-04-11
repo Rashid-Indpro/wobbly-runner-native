@@ -42,7 +42,7 @@ const App: React.FC = () => {
   const [achievements, setAchievements] = useState<Achievement[]>(INITIAL_ACHIEVEMENTS);
   const [ownedPowerUses, setOwnedPowerUses] = useState<Record<string, number>>({});
   
-  const [adPurpose, setAdPurpose] = useState<'REVIVE' | 'STORE' | 'START' | 'SKIN' | 'GET_COINS' | null>(null);
+  const [adPurpose, setAdPurpose] = useState<'GAME_OVER' | 'STORE' | 'START' | 'SKIN' | 'GET_COINS' | null>(null);
   const [adPurposeItem, setAdPurposeItem] = useState<any>(null);
   
   // Helper function to open legal pages
@@ -208,7 +208,7 @@ const App: React.FC = () => {
     setItem('settings', newSettings);
   };
 
-  const requestAd = (purpose: 'REVIVE' | 'STORE' | 'SKIN' | 'GET_COINS', item: any = null) => {
+  const requestAd = (purpose: 'GAME_OVER' | 'STORE' | 'SKIN' | 'GET_COINS', item: any = null) => {
     soundManager.stopBackgroundAudio();
     soundManager.stopMenuBgm();
     setAdPurpose(purpose);
@@ -287,12 +287,10 @@ const App: React.FC = () => {
       if (settings.menuBgmEnabled) {
         soundManager.playMenuBgm();
       }
-    } else if (adPurpose === 'REVIVE') {
+    } else if (adPurpose === 'GAME_OVER') {
+      // After game over ad completes, return to playing state to show game over screen
       setGameState('PLAYING');
-      // Resume gameplay music when reviving
-      if (settings.musicEnabled) {
-        soundManager.playBackgroundAudio();
-      }
+      console.log('📺 Game over ad completed - Game over screen will display');
     } else if (adPurpose === 'START') {
       setGameId(prev => prev + 1);
       setGameState('PLAYING');
@@ -348,7 +346,7 @@ const App: React.FC = () => {
           ownedPowerUses={ownedPowerUses}
         />
       )}
-      {(gameState === 'PLAYING' || (gameState === 'AD_WATCHING' && adPurpose === 'REVIVE')) && (
+      {(gameState === 'PLAYING' || (gameState === 'AD_WATCHING' && adPurpose === 'GAME_OVER')) && (
         <GameContainer 
           key={gameId}
           settings={settings}
@@ -357,7 +355,8 @@ const App: React.FC = () => {
           equippedPowers={equippedPowers}
           ownedPowerUses={ownedPowerUses}
           onUsePower={handleUseEquippedPower}
-          onRequestRevive={() => requestAd('REVIVE')}
+          onRequestGameOverAd={() => requestAd('GAME_OVER')}
+          isAdShowingForGameOver={gameState === 'AD_WATCHING' && adPurpose === 'GAME_OVER'}
           onExit={() => setGameState('MAIN_MENU')}
           onMarkGameplayTipSeen={() => {
             const newSettings = { ...settings, hasSeenGameplayTip: true };
@@ -365,7 +364,6 @@ const App: React.FC = () => {
             setItem('settings', newSettings);
             console.log('✅ Gameplay tip marked as seen');
           }}
-          isExternalAdShowing={gameState === 'AD_WATCHING' && adPurpose === 'REVIVE'}
         />
       )}
       {gameState === 'STORE' && (
