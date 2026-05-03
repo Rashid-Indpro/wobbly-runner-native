@@ -7,8 +7,9 @@ interface RewardedAdManagerProps {
   onError?: () => void;
 }
 
-// Production AdMob ID - always use production ID for release builds
-// If you need to test ads during development, temporarily replace with TestIds.REWARDED
+// Production AdMob Rewarded Ad ID
+// Used for: Store power-ups, coin purchases, and other rewarded actions
+// NOT used for game over (game over uses InterstitialAdManager)
 const AD_UNIT_ID = 'ca-app-pub-9218417844276973/1780277370';
 
 const RewardedAdManager: React.FC<RewardedAdManagerProps> = ({ onComplete, onError }) => {

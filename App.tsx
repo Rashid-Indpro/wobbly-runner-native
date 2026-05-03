@@ -12,6 +12,7 @@ import StoreScreen from './src/components/StoreScreen';
 import SettingsScreen from './src/components/SettingsScreen';
 import Tutorial from './src/components/Tutorial';
 import RewardedAdManager from './src/components/RewardedAdManager';
+import InterstitialAdManager from './src/components/InterstitialAdManager';
 import AchievementsScreen from './src/components/AchievementsScreen';
 import SplashScreen from './src/components/SplashScreen';
 import AboutUs from './src/components/AboutUs';
@@ -438,7 +439,13 @@ const App: React.FC = () => {
         }} />
       )}
       {gameState === 'AD_WATCHING' && (
-        <RewardedAdManager onComplete={handleAdComplete} />
+        <>
+          {adPurpose === 'GAME_OVER' ? (
+            <InterstitialAdManager onComplete={handleAdComplete} />
+          ) : (
+            <RewardedAdManager onComplete={handleAdComplete} />
+          )}
+        </>
       )}
       </View>
     </SafeAreaProvider>
